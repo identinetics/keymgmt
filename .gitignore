@@ -1,0 +1,5 @@
+**/.DS_Store
+.idea/
+install/opt/
+conf*.sh
+*.iml
