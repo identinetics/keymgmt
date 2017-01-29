@@ -8,4 +8,5 @@ RUN apt-get update \
 
 COPY install/gpg.conf /root/.gnupg/gpg.conf
 
-
+VOLUME /root
+VOLUME /var/log
