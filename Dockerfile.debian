@@ -1,0 +1,25 @@
+FROM debian:jessie
+LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
+      version="0.2.0" \
+      capabilites=''
+
+RUN apt-get update \
+ && apt-get -y install git gnupg2 gnupg-agent haveged libccid libksba8 libpth20 \
+    opensc openssh-client pinentry-curses \
+    paperkey pcscd scdaemon usbutils vim \
+ && apt-get clean \
+ && mkdir ~/.gnupg
+
+RUN mkdir -p /opt \
+ && cd /opt \
+ && git clone https://github.com/schlatterbeck/secret-splitting.git \
+ && cd secret-splitting \
+ && /usr/bin/python setup.py install
+
+COPY install/gpg.conf /root/.gnupg/gpg.conf
+COPY install/scripts/*.sh /
+RUN chmod +x /*.sh
+
+VOLUME /root /var/log
+
+WORKDIR /root
