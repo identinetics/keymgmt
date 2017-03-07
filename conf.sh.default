@@ -7,10 +7,21 @@ main() {
     source $SCRIPTDIR/dscripts/conf_lib.sh  # load library functions
 
     init_sudo
+    set_volume_root
     set_image_and_container_name
     set_run_args
+    set_vol_mapping
     #enable_x11_client
     enable_pkcs11
+}
+
+
+set_volume_root() {
+    DOCKERVOL_ROOT='/root/dv'
+    if [ "$TRAVIS" == "true" ]; then
+        DOCKERVOL_ROOT='./dv';
+        DOCKERLOG_ROOT='./dl';
+    fi
 }
 
 
@@ -30,5 +41,10 @@ set_run_args() {
     export STARTCMD='bash'  # unset or blank to use image default
 }
 
+
+set_vol_mapping() {
+    map_docker_volume "${CONTAINERNAME}.root" '/root' 'Z' $DOCKERVOL_ROOT
+    map_docker_volume "${CONTAINERNAME}.log" "$LOGDIR" 'Z' $DOCKERVOL_ROOT
+}
 
 main
