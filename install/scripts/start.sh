@@ -10,3 +10,4 @@ fi
 logger -p local0.info "Starting Smartcard Service"
 $sudo /usr/sbin/pcscd
 
+exec bash
