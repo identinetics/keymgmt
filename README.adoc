@@ -1,0 +1,20 @@
+= Key Management App for LiveCD
+
+This Docker application supports verios smartcard key management tools. It is intended to be
+started from the PVZDLiveCD.
+
+
+== Supported Smart Cards
+There is out-of-the box support for cards, such as:
+
+- OpenPGP card
+- JavaCard with installed Muscle applet
+- other PKI smartcarda supported by OpenSC
+
+To install a proprieatary smart card driver create an image based on this one and include the
+driver installation in the Dockerfile.
+
+== Known Limitations
+
+Plugging and unplugging readers and cards is not signalled to the application container. (This
+would need and improved dbus integration with the container.)

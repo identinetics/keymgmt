@@ -1,3 +1,4 @@
+# this one does not have the latest functionality
 FROM debian:jessie
 LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
       version="0.2.0" \
@@ -23,3 +24,5 @@ RUN chmod +x /*.sh
 VOLUME /root /var/log
 
 WORKDIR /root
+
+#export MODULE='--module /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so' #debian

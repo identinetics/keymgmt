@@ -3,6 +3,8 @@ LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
       version="0.2.0" \
       capabilites=''
 
+# Caveat: home directory is not persistent -> mapped to /tmp when started from LiveCD
+
 # Key Management App for PVZDliveCD
 
 # general tools
@@ -25,10 +27,6 @@ RUN yum -y install opensc openssl pcsc-lite usbutils \
  && yum clean all \
  && systemctl enable pcscd.service
 
-# key management stuff
-#RUN yum -y install gnupg2 gnupg-agent haveged libccid libksba8 libpth20 \
-#    pinentry-curses paperkey scdaemon
-
 # python: pip, -devel
 RUN yum -y install python-pip python-devel \
  && yum clean all \
@@ -47,10 +45,20 @@ RUN mkdir -p /opt \
  && cd secret-splitting \
  && /usr/bin/python setup.py install
 
+# key management stuff
+RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libpth20 \
+    pinentry-curses paperkey scdaemon
+
+COPY install/scripts/*.sh /
+
 ARG USERNAME=livecd
 ARG UID=1000
 RUN groupadd --gid $UID $USERNAME \
  && useradd --gid $UID --uid $UID $USERNAME \
- && chown $USERNAME:$USERNAME /run /var/log
+ && chown $USERNAME:$USERNAME /run /var/log /*.sh \
+ && chmod +x /*.sh
 
-USER $USERNAME
+# Generic driver
+ENV PKCS11_CARD_DRIVER='/usr/lib64/pkcs11/opensc-pkcs11.so'
+
+# need start as root to start pcscd
