@@ -16,21 +16,19 @@ function add_line_if_not_found() {
 add_line_if_not_found "use-agent" ~/.gnupg/gpg.conf
 add_line_if_not_found "keyserver hkp://pgp.mit.edu" ~/.gnupg/gpg.conf
 
+# start gpg-agent
 add_line_if_not_found "enable-ssh-support" ~/.gnupg/gpg-agent.conf
-add_line_if_not_found "write-env-file ~.gpg-agent-info" ~/.gnupg/gpg-agent.conf
+add_line_if_not_found "write-env-file " ~/.gnupg/gpg-agent.conf
 add_line_if_not_found "default-cache-ttl 1800" ~/.gnupg/gpg-agent.conf
+gpg-agent --daemon > ~.gpg-agent-info.sh # this one includes 'export'
 
-gpg-agent --daemon --write-env --enable-ssh-support --use-standard-socket
-
-source ~/.gpg-agent-info
-export GPG_AGENT_INFO
-export SSH_AUTH_SOCK
-export SSH_AGENT_PID
-
+# fetch key from card
 gpg --card-edit
 # fetch
 # quit
 
 gpg --list-keys
 
+# import keys into OpenSSH
+source ~/.gpg-agent-info.sh
 ssh-add -L   # output of -L can be used to add kes to authorzized_keys
