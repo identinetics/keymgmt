@@ -1,0 +1,105 @@
+= GPG How To with SmartCards
+
+To have backup cards it is necessary to create the key pair on a PC (best on a LiveCD-booted system)
+and upload the key pair to each smart card. Then make good backups of your key pair and store it
+securely.
+
+
+== Prerequisites
+
+OpenPGP Smart Card  -> order from http://shop.kernelconcepts.de/ (Kernel Concepts).
+This card is capable of using 4096 bit RSA.
+
+== Create Key on Disk and Transfer to Cards
+
+Generate a keypair
+
+    gpg --gen-key
+
+List the keys that are now available
+
+    gpg --list-keys
+    gpg --list-secret-keys
+
+Add an authentication/signature/etc. subkey to your new keypair
+
+    gpg –-edit-key
+        addkey
+
+Check if the smartcard card is avaiable, and set your PINs (possibly making a safe copy of the PINs).
+Skip this for Yubukey.
+
+    gpg --card-status
+    gpg --card-edit
+        admin
+        passwd
+
+Then transfer the private part of the newly created key to the smart card
+
+    gpg --edit-key <keyid>
+        toggle
+        keytocard
+
+        # for subkeys:
+        key 1
+        keytocard
+        key 2
+        keytocard
+        ...
+
+Generate the revocation key
+
+    gpg --gen-revoke
+
+Repeat the process above for the backup cards, then archive and delete the private key and the
+revocation key. You may
+want to use the splitkey tool, print as QR-code or user paperkey. A plain or encrypted copy in
+a physical vault would make sense, too.
+
+    gpg --delete-secret-keys <keyid>
+    gpg --card-status  # creates a "secret key stub" required to manage the card
+
+== Using the GPG card
+
+The following documentation is not specific for the keymgmt system.
+
+=== Key administration
+
+You may need to sign keys if you go beyond 1:1 trust relationships.
+
+    gpg --list-sigs  # see key sigantures
+    gpg --fingerprint # create a fingerprint to vouch for a key with an out-of-band proof
+    gpg --edit-key <uid/keyid>
+        sign
+
+=== Use GPG to Sign and Verify Payload
+
+On a virgin system remember to run `gpg --card-status` to create a secret key stub.
+
+    gpg --clearsign mydata
+    gpg --verify mydata.asc
+
+=== Use GPG with SSH (Linux)
+
+See also the example script gpg_start.sh
+
+By default OpenSSH uses the ssh-agent application to handle authentication. gpg-agent has been
+designed to speak the same protocol as ssh-agent. So you need to stop the ssh-agent process, and
+add “enable-ssh-support” to ~/.gnupg/gpg-agent.conf
+
+    grep -c "enable-ssh-support" ~/.gnupg/gpg-agent.conf > /dev/null || \
+        echo enable-ssh-support >> ~/.gnupg/gpg-agent.conf
+
+Make sure gpgp is using gpg-agent (it should by default)
+
+    grep -c "use-agent" ~/.gnupg/gpg.conf > /dev/null || \
+        echo "use-agent" >> ~/.gnupg/gpg.conf
+
+Then the OpenSSH client should start talking to gpg-agent instead. Then:
+
+    gpg --card-edit
+        fetch
+        quit
+    ssh-add -l
+
+You should see that the key you generated previously is mentioned (only when the smart card is inserted).
