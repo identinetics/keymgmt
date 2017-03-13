@@ -14,6 +14,9 @@ There is out-of-the box support for cards, such as:
 To install a proprieatary smart card driver create an image based on this one and include the
 driver installation in the Dockerfile.
 
+Commands use PKCS11_CARD_DRIVER to point to the card driver.
+The default value is '/usr/lib64/pkcs11/opensc-pkcs11.so'.
+
 == Known Limitations
 
 Plugging and unplugging readers and cards is not signalled to the application container. (This

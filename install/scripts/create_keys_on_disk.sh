@@ -4,7 +4,7 @@
 
 main() {
     get_commandline_opts $@
-    #mount_ramdisk
+    mount_ramdisk
     set_openssl_config
     create_keypair_and_certificate
 }
@@ -45,9 +45,11 @@ EOF
 
 
 mount_ramdisk() {
-    mkdir /ramdisk
+    mkdir -p /ramdisk
     mount -t tmpfs -o size=10M tmpfs /ramdisk
     cd /ramdisk
+    [ $PWD != '/ramdisk' ] && echo "could not make or mount /ramdisk" && exit 1
+
 }
 
 
@@ -79,8 +81,8 @@ create_keypair_and_certificate() {
         echo $cmd2
     fi
 
-    echo $cmd1 > $0.tmp   # indirect execution as workaround against "invalid subject not beginning with '/'"
-    bash ./$0.tmp
+    echo $cmd1 > /tmp/$0.tmp   # indirect execution as workaround against "invalid subject not beginning with '/'"
+    bash /tmp/$0.tmp
     $cmd2
     # provide the old pkcs1 private key format in addition to pkcs8
     chmod 600 /ramdisk/${keyname}_key_pkcs?.pem
