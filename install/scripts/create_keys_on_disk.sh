@@ -74,16 +74,19 @@ create_keypair_and_certificate() {
         -sha256 -days 3650 -nodes
         -batch -subj \"$x509subject\"
     "
-    cmd2="openssl rsa -in /ramdisk/${keyname}_key_pkcs8.pem -out /ramdisk/${keyname}_key_pkcs1.pem"
+    cmd2="openssl x509 -inform PEM -in /ramdisk/${keyname}_crt.pem -outform DER -out /ramdisk/${keyname}_crt.der"
+    cmd3="openssl rsa -in /ramdisk/${keyname}_key_pkcs8.pem -out /ramdisk/${keyname}_key_pkcs1.pem"
 
     if [ "$verbose" == "True" ]; then
         echo $cmd1
         echo $cmd2
+        echo $cmd3
     fi
 
     echo $cmd1 > /tmp/$0.tmp   # indirect execution as workaround against "invalid subject not beginning with '/'"
     bash /tmp/$0.tmp
     $cmd2
+    $cmd3
     # provide the old pkcs1 private key format in addition to pkcs8
     chmod 600 /ramdisk/${keyname}_key_pkcs?.pem
 }
