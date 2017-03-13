@@ -19,6 +19,7 @@ get_commandline_args() {
         d) DRYRUN='True'; verbose="True";;
         k) PRIVKEY=$OPTARG;;
         i) INIT='True';;
+        l) CERTLABELOPT="-l $OPTARG";;
         n) TOKENLABEL=$OPTARG;;
         p) PKCS11_CARD_DRIVER=$OPTARG;;
         s) SOPIN=$OPTARG;;
@@ -44,12 +45,13 @@ check_mandatory_args() {
 usage() {
     cat << EOF
         Transfer certificate + private key to PKCS#11 Token
-        usage: $0 [-i] -n <Token Name> [-p <PKCS#11 driver>] [-s <SO PIN>] -t <User PIN> [-v]
+        usage: $0 [-i] [-l <label> ] -n <Token Name> [-p <PKCS#11 driver>] [-s <SO PIN>] -t <User PIN> [-v]
           -c  Certifiate file
           -d  Dry run: print commands but do not execute
           -h  print this help text
           -i  initialize token before writing key
           -k  Private key file
+          -l  Certificate/private key label
           -n  Token Name
           -s  Security Officer PIN
           -p  Path to library of PKCS#11 driver (default: $PKCS11_CARD_DRIVER)
@@ -71,10 +73,10 @@ initialize_token() {
 
 write_key_to_token() {
     echo 'writing certificate'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN -w $CERT --type cert"
+    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN -w $CERT --type cert $CERTLABELOPT"
     run_command
     echo 'writing private key'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN -w $PRIVKEY --type privkey"
+    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN -w $PRIVKEY --type privkey $CERTLABELOPT"
     run_command
     echo 'Checking objects on card'
     cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login -O --pin $USERPIN"
