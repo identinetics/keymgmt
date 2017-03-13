@@ -84,22 +84,19 @@ On a virgin system remember to run `gpg --card-status` to create a secret key st
 See also the example script gpg_start.sh
 
 By default OpenSSH uses the ssh-agent application to handle authentication. gpg-agent has been
-designed to speak the same protocol as ssh-agent. So you need to stop the ssh-agent process, and
-add “enable-ssh-support” to ~/.gnupg/gpg-agent.conf
+designed to speak the same protocol as ssh-agent. So you need to stop the ssh-agent process.
 
-    grep -c "enable-ssh-support" ~/.gnupg/gpg-agent.conf > /dev/null || \
-        echo enable-ssh-support >> ~/.gnupg/gpg-agent.conf
+    add “enable-ssh-support” to ~/.gnupg/gpg-agent.conf
+    add "keyserver hkp://pgp.mit.edu" to ~/.gnupg/gpg.conf
+    add "use-agent" to ~/.gnupg/gpg.conf
 
-Make sure gpgp is using gpg-agent (it should by default)
-
-    grep -c "use-agent" ~/.gnupg/gpg.conf > /dev/null || \
-        echo "use-agent" >> ~/.gnupg/gpg.conf
-
-Then the OpenSSH client should start talking to gpg-agent instead. Then:
-
-    gpg --card-edit
+    gpg2 --card-edit
         fetch
         quit
     ssh-add -l
 
 You should see that the key you generated previously is mentioned (only when the smart card is inserted).
+
+
+=== Use GPG with SSH (Mac OSX)
+
