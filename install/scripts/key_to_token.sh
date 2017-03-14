@@ -86,7 +86,7 @@ write_key_to_token() {
 
 run_command() {
     if [ $verbose ]; then
-        echo $cmd
+        echo $cmd; echo
     fi
     if [ ! $DRYRUN ]; then
         $cmd

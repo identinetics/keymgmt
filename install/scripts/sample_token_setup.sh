@@ -7,5 +7,6 @@
 cd /ramdisk
 
 /key_to_token.sh -d -i -n testtoken -s 12345678 -t 123456 \
-    -c metadataaggregator_crt.pem \
-    -k metadataaggregator_key_pkcs8.pem
+    -c localhost_crt.pem \
+    -k localhost_key_pkcs8.pem
+
