@@ -76,19 +76,23 @@ create_keypair_and_certificate() {
     "
     cmd2="openssl x509 -inform PEM -in /ramdisk/${keyname}_crt.pem -outform DER -out /ramdisk/${keyname}_crt.der"
     cmd3="openssl rsa -in /ramdisk/${keyname}_key_pkcs8.pem -out /ramdisk/${keyname}_key_pkcs1.pem"
+    cmd4="openssl pkcs12 -export -out /ramdisk/${keyname}_crt.p12 -in /ramdisk/${keyname}_crt.pem -inkey -in /ramdisk/${keyname}_key_pkcs1.pem"
 
     if [ "$verbose" == "True" ]; then
         echo $cmd1
         echo $cmd2
         echo $cmd3
+        echo $cmd4
     fi
 
     echo $cmd1 > /tmp/$0.tmp   # indirect execution as workaround against "invalid subject not beginning with '/'"
     bash /tmp/$0.tmp
     $cmd2
     $cmd3
+    echo "create PKCS#12 certificate file including private key"
+    $cmd4
     # provide the old pkcs1 private key format in addition to pkcs8
-    chmod 600 /ramdisk/${keyname}_key_pkcs?.pem
+    chmod 600 /ramdisk/${keyname}_key_*.pem /ramdisk/${keyname}_key_crt.p12
 }
 
 
