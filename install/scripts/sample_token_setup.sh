@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 /create_keys_on_disk.sh -v \
-    -n metadataaggregator \
+    -n localhost \
     -s /C=AT/ST=Wien/L=Wien/O=ABCfirma/OU=IT/CN=localhost
 
 cd /ramdisk
