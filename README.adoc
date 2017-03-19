@@ -17,6 +17,10 @@ driver installation in the Dockerfile.
 Commands use PKCS11_CARD_DRIVER to point to the card driver.
 The default value is '/usr/lib64/pkcs11/opensc-pkcs11.so'.
 
+== GPG support
+
+See the link:docs/GPG-howto.adoc[GPG-howto].
+
 == Known Limitations
 
 Plugging and unplugging readers and cards is not signalled to the application container. (This

@@ -52,16 +52,29 @@ Generate the revocation key
     gpg --gen-revoke
 
 Repeat the process above for the backup cards, then archive and delete the private key and the
-revocation key. You may
-want to use the splitkey tool, print as QR-code or user paperkey. A plain or encrypted copy in
+revocation key. You may want to use the splitkey tool, print as QR-code or user paperkey. A plain
+or encrypted copy in
 a physical vault would make sense, too.
 
     gpg --delete-secret-keys <keyid>
     gpg --card-status  # creates a "secret key stub" required to manage the card
 
+Finally, push the public key to a key server
+
+    gpg --keyserver hkps://pgp.mit.edu --send-keys <keyid>
+
+
 == Using the GPG card
 
 The following documentation is not specific for the keymgmt system.
+To make the key available on another system you need to fetch the pulic key from a key server
+and create a stub for the secret key:
+
+    gpg2 --card-edit
+        fetch
+        quit
+    gpg2 --card-status
+
 
 === Key administration
 
@@ -90,9 +103,6 @@ designed to speak the same protocol as ssh-agent. So you need to stop the ssh-ag
     add "keyserver hkp://pgp.mit.edu" to ~/.gnupg/gpg.conf
     add "use-agent" to ~/.gnupg/gpg.conf
 
-    gpg2 --card-edit
-        fetch
-        quit
     ssh-add -l
 
 You should see that the key you generated previously is mentioned (only when the smart card is inserted).
