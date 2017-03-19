@@ -2,7 +2,7 @@
 FROM debian:jessie
 LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
       version="0.2.0" \
-      capabilites=''
+      capabilities=''
 
 RUN apt-get update \
  && apt-get -y install git gnupg2 gnupg-agent haveged libccid libksba8 libpth20 \

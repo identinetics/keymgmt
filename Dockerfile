@@ -1,7 +1,8 @@
 FROM centos:centos7
 LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
       version="0.3.0" \
-      capabilites=''
+      didi_dir="https://raw.githubusercontent.com/identinetics/keymgmt/master/didi" \
+      capabilities=''
 
 # Caveat: home directory is not persistent -> mapped to /tmp when started from LiveCD
 
