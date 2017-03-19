@@ -67,7 +67,7 @@ The following documentation is not specific for the keymgmt system.
 
 You may need to sign keys if you go beyond 1:1 trust relationships.
 
-    gpg --list-sigs  # see key sigantures
+    gpg --list-sigs  # see key signatures
     gpg --fingerprint # create a fingerprint to vouch for a key with an out-of-band proof
     gpg --edit-key <uid/keyid>
         sign
@@ -76,7 +76,7 @@ You may need to sign keys if you go beyond 1:1 trust relationships.
 
 On a virgin system remember to run `gpg --card-status` to create a secret key stub.
 
-    gpg --clearsign mydata
+    gpg --clearsign mydata  # must be gpg2 on mac
     gpg --verify mydata.asc
 
 === Use GPG with SSH (Linux)
