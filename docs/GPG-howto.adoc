@@ -75,6 +75,8 @@ and create a stub for the secret key:
         quit
     gpg2 --card-status
 
+See also /gpg_setup.sh
+
 
 === Key administration
 
@@ -91,6 +93,9 @@ On a virgin system remember to run `gpg --card-status` to create a secret key st
 
     gpg --clearsign mydata  # must be gpg2 on mac
     gpg --verify mydata.asc
+
+
+See also /gpg_sign.sh
 
 === Use GPG with SSH (Linux)
 

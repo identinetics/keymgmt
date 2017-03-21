@@ -1,9 +1,0 @@
-{
-    "FormatVersion": 1,
-    "RepoDigests": [
-        "rhoerbe/keymgmt@sha256:ce9152c05b37b0ad00d381a25d494366eb35cc2b1520a9c9df37995d9401c55f"
-    ],
-    "RepoTags": [
-        "rhoerbe/keymgmt:latest"
-    ]
-}
