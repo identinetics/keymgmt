@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-#set -eu -o pipefail
-
 
 main() {
     get_commandline_opts $@
@@ -11,11 +9,13 @@ main() {
 
 
 get_commandline_opts() {
+    basicConstraintsCA='FALSE'
     keysize=2048
-    x509subject='C=AT/ST=Wien/L=Wien/O=Testfirma/OU=IT/CN=localhost'
+    x509subject='/C=AT/ST=Wien/L=Wien/O=Testfirma/OU=IT/CN=localhost'
     keyname='signer'
-    while getopts ":k:n:s:v" opt; do
+    while getopts ":ck:n:s:v" opt; do
       case $opt in
+        c) basicConstraintsCA='TRUE';;
         k) keysize=$OPTARG
            re='^[0-9]{3,5}$'
            if ! [[ $OPTARG =~ $re ]] ; then
@@ -35,6 +35,7 @@ get_commandline_opts() {
 usage() {
     cat << EOF
         usage: $0 [-k <NNNN>] [-n <key name>] [-v] [-s <X509 subject>]
+          -c  Use certificate as CA (basicConstraints:CA=TRUE)
           -h  print this help text
           -k  keysize (default: $keysize)
           -n  file name of key and certificate (default: $keyname)
@@ -59,7 +60,7 @@ set_openssl_config() {
 distinguished_name=dn
 [ dn ]
 [ ext ]
-basicConstraints=CA:FALSE
+basicConstraints=CA:$basicConstraintsCA
 EOT
 
 }
@@ -92,7 +93,7 @@ create_keypair_and_certificate() {
     echo "create PKCS#12 certificate file including private key"
     $cmd4
     # provide the old pkcs1 private key format in addition to pkcs8
-    chmod 600 /ramdisk/${keyname}_key_*.pem /ramdisk/${keyname}_key_crt.p12
+    chmod 600 /ramdisk/${keyname}_key_*.pem /ramdisk/${keyname}_crt.p12
 }
 
 
