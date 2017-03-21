@@ -1,6 +1,6 @@
 FROM centos:centos7
 LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
-      version="0.3.1" \
+      version="0.4.0" \
       didi_dir="https://raw.githubusercontent.com/identinetics/keymgmt/master/didi" \
       capabilities=''
 
@@ -48,7 +48,7 @@ RUN mkdir -p /opt \
 
 # key management stuff
 RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libpth20 \
-    pinentry-curses paperkey scdaemon
+    pinentry-curses paperkey qrencode scdaemon
 
 COPY install/scripts/*.sh /
 RUN mkdir -p /usr/local/etc/gpg
