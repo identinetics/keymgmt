@@ -51,7 +51,8 @@ RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libp
     pinentry-curses paperkey scdaemon
 
 COPY install/scripts/*.sh /
-COPY install/gpg /etc
+RUN mkdir -p /usr/local/etc/gpg
+COPY install/gpg/* /usr/local/etc/gpg/
 
 ARG USERNAME=livecd
 ARG UID=1000
