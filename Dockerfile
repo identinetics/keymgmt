@@ -1,6 +1,6 @@
 FROM centos:centos7
 LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
-      version="0.3.0" \
+      version="0.3.1" \
       didi_dir="https://raw.githubusercontent.com/identinetics/keymgmt/master/didi" \
       capabilities=''
 
@@ -51,6 +51,7 @@ RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libp
     pinentry-curses paperkey scdaemon
 
 COPY install/scripts/*.sh /
+COPY install/gpg /etc
 
 ARG USERNAME=livecd
 ARG UID=1000
