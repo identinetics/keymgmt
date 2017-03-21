@@ -12,6 +12,9 @@ fi
 logger -p local0.info "Starting Smartcard Service"
 $sudo /usr/sbin/pcscd
 
+logger -p local0.info "Starting HAVEGE Entropy Service"
+$sudo /usr/sbin/haveged
+
 su - livecd
 
 exec bash
