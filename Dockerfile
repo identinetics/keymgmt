@@ -53,6 +53,7 @@ RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libp
 COPY install/scripts/*.sh /
 RUN mkdir -p /usr/local/etc/gpg
 COPY install/gpg/* /usr/local/etc/gpg/
+COPY install/sudoers.d/* /etc/
 
 ARG USERNAME=livecd
 ARG UID=1000
