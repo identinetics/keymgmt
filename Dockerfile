@@ -65,3 +65,4 @@ RUN groupadd --gid $UID $USERNAME \
 ENV PKCS11_CARD_DRIVER='/usr/lib64/pkcs11/opensc-pkcs11.so'
 
 # need start as root to start pcscd
+CMD /start.sh
