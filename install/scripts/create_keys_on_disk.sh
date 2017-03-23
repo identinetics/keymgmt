@@ -39,17 +39,21 @@ usage() {
           -h  print this help text
           -k  keysize (default: $keysize)
           -n  file name of key and certificate (default: $keyname)
-          -v  print command
+          -v  verbose
           -s  x509 subject DN (default: $x509subject)
 EOF
 }
 
 
 mount_ramdisk() {
-    mkdir -p /ramdisk
-    mount -t tmpfs -o size=10M tmpfs /ramdisk
+    if [ $(id -u) -ne 0 ]; then
+        sudo="sudo"
+    fi
+    $sudo mkdir -p /ramdisk
+    $sudo mount -t tmpfs -o size=10M tmpfs /ramdisk
     cd /ramdisk
     [ $PWD != '/ramdisk' ] && echo "could not make or mount /ramdisk" && exit 1
+    echo "Created ramdisk at /ramdisk"
 
 }
 
