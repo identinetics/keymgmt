@@ -17,11 +17,35 @@ driver installation in the Dockerfile.
 Commands use PKCS11_CARD_DRIVER to point to the card driver.
 The default value is '/usr/lib64/pkcs11/opensc-pkcs11.so'.
 
-== GPG support
+== GPG Support
 
 See the link:docs/GPG-howto.adoc[GPG-howto].
+
+== Key Archiving Tools
+
+=== N out of N Key Splitting
+
+A cryptographically secure key splitting scheme for n out of n parties, e.g. with 3 parties:
+
+     secret-split -n 3 localhost_key_pkcs1.pem
+
+To recover the original key:
+
+    secret-combine -o localhost_key_pkcs1.pem localhost_key_pkcs1.pem.part?
+
+=== Print Key as QR-Code
+
+    cat localhost_key_pkcs1.pem | qrencode –o localhost_key_pkcs1.eps
+
+Print QR-code (e.g. using Libre Office), a SHA256 checksum and the related public key.
+
 
 == Known Limitations
 
 Plugging and unplugging readers and cards is not signalled to the application container. (This
 would need and improved dbus integration with the container.)
+
+Starting haveged before using gpg may lead to an "signing failed: Operation cancelled" error.
+Workaround: Check available entropy before crypto ops:
+
+    cat /proc/sys/kernel/random/entropy_avail

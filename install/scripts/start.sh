@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e -o pipefail
 
 # main entrypoint of the docker container
 
@@ -12,8 +11,9 @@ fi
 logger -p local0.info "Starting Smartcard Service"
 $sudo /usr/sbin/pcscd
 
-logger -p local0.info "Starting HAVEGE Entropy Service"
-$sudo /usr/sbin/haveged
+#logger -p local0.info "Starting HAVEGE Entropy Service"
+#disabled because gpg2 --sign is failing with "signing failed: Operation cancelled"
+#$sudo /usr/sbin/haveged
 
 su - livecd
 

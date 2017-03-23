@@ -80,7 +80,7 @@ See also /gpg_setup.sh
 
 === Key administration
 
-You may need to sign keys if you go beyond 1:1 trust relationships.
+You may need to sign keys if you go beyond 1:1 trust relationships.gi
 
     gpg --list-sigs  # see key signatures
     gpg --fingerprint # create a fingerprint to vouch for a key with an out-of-band proof
