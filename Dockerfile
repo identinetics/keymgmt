@@ -51,9 +51,10 @@ RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libp
     pinentry-curses paperkey qrencode scdaemon
 
 COPY install/scripts/*.sh /
-RUN mkdir -p /usr/local/etc/gpg /etc/sudoers.d
+RUN mkdir -p /usr/local/etc/gpg /etc/sudoers.d /etc/profile.d
 COPY install/gpg/* /usr/local/etc/gpg/
 COPY install/sudoers.d/* /etc/sudoers.d/
+COPY install/profile.d/* /etc/profile.d/
 
 ARG USERNAME=liveuser
 ARG UID=1000

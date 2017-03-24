@@ -15,6 +15,4 @@ $sudo /usr/sbin/pcscd
 #disabled because gpg2 --sign is failing with "signing failed: Operation cancelled"
 #$sudo /usr/sbin/haveged
 
-su - livecd
-
-exec bash
+exec su - liveuser
