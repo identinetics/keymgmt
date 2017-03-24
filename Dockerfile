@@ -55,7 +55,7 @@ RUN mkdir -p /usr/local/etc/gpg /etc/sudoers.d
 COPY install/gpg/* /usr/local/etc/gpg/
 COPY install/sudoers.d/* /etc/sudoers.d/
 
-ARG USERNAME=livecd
+ARG USERNAME=liveuser
 ARG UID=1000
 RUN groupadd --gid $UID $USERNAME \
  && useradd --gid $UID --uid $UID $USERNAME \
