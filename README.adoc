@@ -28,6 +28,8 @@ See the link:docs/GPG-howto.adoc[GPG-howto].
 A cryptographically secure key splitting scheme for n out of n parties, e.g. with 3 parties:
 
      secret-split -n 3 localhost_key_pkcs1.pem
+        or
+     secret-split --random-source /dev/urandom -n 3 localhost_key_pkcs1.pem  # do not wait for entropy on /dev/random
 
 To recover the original key:
 
