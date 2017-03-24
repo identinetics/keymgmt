@@ -51,7 +51,6 @@ set_run_args() {
 
 set_vol_mapping() {
     map_docker_volume "${CONTAINERNAME}.root" '/root' 'Z' $DOCKERVOL_ROOT
-    map_docker_volume "${CONTAINERNAME}.log" "$LOGDIR" 'Z' $DOCKERVOL_ROOT
 }
 
 main
