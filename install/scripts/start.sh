@@ -4,9 +4,8 @@
 
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
-if [ $(id -u) -eq 0 ]; then
-    echo 'Env variable PKCS11_CARD_DRIVER is set for liveuser, not for root!'
-else
+if [ $(id -u) -ne 0 ]; then
+    echo 'Env variable PKCS11_CARD_DRIVER is set for root!'
     sudo='sudo'
 fi
 
@@ -16,3 +15,5 @@ $sudo /usr/sbin/pcscd
 #logger -p local0.info "Starting HAVEGE Entropy Service"
 #disabled because gpg2 --sign is failing with "signing failed: Operation cancelled"
 #$sudo /usr/sbin/haveged
+
+exec bash
