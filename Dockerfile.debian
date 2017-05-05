@@ -1,28 +1,27 @@
 # this one does not have the latest functionality
 FROM debian:jessie
-LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
-      version="0.2.0" \
-      capabilities=''
 
 RUN apt-get update \
- && apt-get -y install git gnupg2 gnupg-agent haveged libccid libksba8 libpth20 \
-    opensc openssh-client pinentry-curses \
-    paperkey pcscd scdaemon usbutils vim \
+ && apt-get -y install libccid libksba8 libpth20 \
+    opensc openssh-client pcscd scdaemon usbutils vim \
  && apt-get clean \
  && mkdir ~/.gnupg
 
-RUN mkdir -p /opt \
- && cd /opt \
- && git clone https://github.com/schlatterbeck/secret-splitting.git \
- && cd secret-splitting \
- && /usr/bin/python setup.py install
-
-COPY install/gpg.conf /root/.gnupg/gpg.conf
+ENV USERNAME liveuser
+ENV UID 1000
 COPY install/scripts/*.sh /
-RUN chmod +x /*.sh
-
-VOLUME /root /var/log
-
-WORKDIR /root
+RUN chmod +x /*.sh \
+ && groupadd -g $UID $USERNAME \
+ && adduser --gid $UID --no-create-home --disabled-password --gecos "" --uid $UID $USERNAME
 
 #export MODULE='--module /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so' #debian
+
+RUN apt-get -y install  libgtk2.0-0 openssl psmisc sudo xterm
+
+#COPY install/safenet/Linux/Installation/Standard/DEB/SafenetAuthenticationClient-9.1.7-0_amd64.deb /opt/sac/
+#RUN dpkg -i /opt/sac/SafenetAuthenticationClient-9.1.7-0_amd64.deb
+COPY install/safenet/Linux_9_0_43/Installation/Standard/DEB/x64/SafenetAuthenticationClient-9.0.43-0_amd64.deb /opt/sac/
+RUN dpkg -i /opt/sac/SafenetAuthenticationClient-9.0.43-0_amd64.deb
+
+COPY install/sudoers.d/* /etc/sudoers.d/
+USER $USERNAME
