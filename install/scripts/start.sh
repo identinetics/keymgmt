@@ -12,6 +12,9 @@ fi
 logger -p local0.info "Starting PC/SC Smartcard Service"
 $sudo /usr/sbin/pcscd
 
+#logger -p local0.info "Starting DBUS Service"
+#$sudo /bin/dbus-daemon --system --nofork --nopidfile
+
 #logger -p local0.info "Starting HAVEGE Entropy Service"
 #disabled because gpg2 --sign is failing with "signing failed: Operation cancelled"
 #$sudo /usr/sbin/haveged

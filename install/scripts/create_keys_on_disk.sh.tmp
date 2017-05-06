@@ -1,1 +1,0 @@
-openssl req -config /tmp/openssl.cfg -x509 -newkey rsa:2048 -keyout /ramdisk/metadataaggregator_key_pkcs8.pem -out /ramdisk/metadataaggregator_crt.pem -sha256 -days 3650 -nodes -batch -subj "/C=AT/ST=Wien/L=Wien/O=Bildungsministerium/OU=IT/CN=localhost"
