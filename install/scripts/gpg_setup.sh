@@ -3,6 +3,7 @@
 # import & trust key; set gpg options
 
 main() {
+    #TODO: test for GPG version - this works with gpg2 >=2.1
     set_image_signature_args
     import_pub_key
     gpg2 --card-status  # create secret key stub
