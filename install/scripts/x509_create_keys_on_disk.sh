@@ -5,6 +5,7 @@ main() {
     mount_ramdisk
     set_openssl_config
     create_keypair_and_certificate
+    show_result
 }
 
 
@@ -90,14 +91,20 @@ create_keypair_and_certificate() {
         echo $cmd4
     fi
 
-    echo $cmd1 > /tmp/$0.tmp   # indirect execution as workaround against "invalid subject not beginning with '/'"
-    bash /tmp/$0.tmp
+    tmpname=/tmp/$(basename $0.tmp)
+    echo $cmd1 > $tmpname   # indirect execution as workaround against "invalid subject not beginning with '/'"
+    bash $tmpname
     $cmd2
     $cmd3
     echo "create PKCS#12 certificate file including private key"
     $cmd4
     # provide the old pkcs1 private key format in addition to pkcs8
     chmod 600 /ramdisk/${keyname}_key_*.pem /ramdisk/${keyname}_crt.p12
+}
+
+
+show_result() {
+    ls -l /ramdisk
 }
 
 

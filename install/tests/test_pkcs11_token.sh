@@ -6,8 +6,8 @@ main() {
     opensc_list_reades_and_drivers
     show_pkcs11_info
     run_pykcs11
-    show_pkcs15_objects
-    exec bash
+    # show_pkcs15_objects
+    # exec bash
 }
 
 
@@ -35,7 +35,7 @@ test_carddriver_setting() {
 
 
 show_pkcs11_info() {
-    [ -z "$TOKENPW" ] && TOKENPW='secret1'
+    [ -z "$TOKENPW" ] && TOKENPW='Secret.1'
     echo
     echo "=== show token info ==="
     pkcs11-tool --module $PKCS11_CARD_DRIVER --show-info

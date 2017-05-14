@@ -115,3 +115,6 @@ You should see that the key you generated previously is mentioned (only when the
 
 === Use GPG with SSH (Mac OSX)
 
+=== Reading
+
+https://gist.github.com/abeluck/3383449
