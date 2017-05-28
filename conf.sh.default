@@ -13,7 +13,6 @@ main() {
     set_run_args
     set_vol_mapping
     #enable_x11_client
-    enable_pkcs11
 }
 
 
@@ -44,8 +43,11 @@ set_image_signature_args() {
 
 
 set_run_args() {
-    export ENVSETTINGS="-e TOKENPW=Secret.1"
+    export ENVSETTINGS="-e PKCS11_CARD_DRIVER=/usr/lib64/libetvTokenEngine.so"  # Safenet eTokenPro
+    export ENVSETTINGS="$ENVSETTINGS -e USERPIN=Secret.1"  # configure user password
+    export ENVSETTINGS="$ENVSETTINGS -e SOPIN=Secret.2"  # configure admin password
     export STARTCMD='bash'  # unset or blank to use image default
+    enable_pkcs11
 }
 
 
