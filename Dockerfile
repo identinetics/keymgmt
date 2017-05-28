@@ -10,7 +10,7 @@ LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
 
 # general tools
 RUN yum -y update \
- && yum -y install curl git ip lsof net-tools openssl sudo unzip wget which \
+ && yum -y install curl git ip lsof net-tools openssl sudo sysvinit-tools unzip wget which \
  && yum clean all
 
 # EPEL, development tools +  X.11
@@ -30,11 +30,11 @@ RUN yum -y install python-pip python-devel \
  && yum clean all \
  && pip install --upgrade pip
 
-# using pykcs11 1.3.0 because of missing wrapper in v 1.3.1
-# using easy_install solves install bug
 RUN pip install six \
  && easy_install --upgrade six \
- && pip install importlib pykcs11==1.3.0
+ && pip install importlib pykcs11>1.3.1
+# using pykcs11 1.3.0 because of missing wrapper in v 1.3.1
+# && pip install importlib pykcs11==1.3.0
 
 # secret-key splitting utility
 RUN mkdir -p /opt \
@@ -48,6 +48,7 @@ RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libp
     pinentry-curses paperkey qrencode scdaemon
 
 COPY install/scripts/* /scripts/
+COPY install/tests/* /tests/
 RUN mkdir -p /usr/local/etc/gpg /etc/sudoers.d /etc/profile.d
 COPY install/gpg/* /usr/local/etc/gpg/
 COPY install/sudoers.d/* /etc/sudoers.d/
@@ -58,7 +59,7 @@ ARG UID=1000
 RUN groupadd --gid $UID $USERNAME \
  && useradd --gid $UID --uid $UID $USERNAME \
  && chown $USERNAME:$USERNAME /run /var/log /scripts/* \
- && chmod +x /scripts/*
+ && chmod +x /scripts/* /tests/*
 
 # Generic driver
 ENV PKCS11_CARD_DRIVER='/usr/lib64/pkcs11/opensc-pkcs11.so'

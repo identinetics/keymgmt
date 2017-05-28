@@ -3,7 +3,7 @@
 HSMUSBDEVICE='Aladdin Knowledge Systems Token JC'  # output of lsusb
 HSMP11DEVICE='eToken 5110'                         # output of pkcs11-tool --list-token-slots
 
-set -e
+set +e
 
 echo 'Test 20: HSM USB device'
 lsusb | grep "$HSMUSBDEVICE"
@@ -20,7 +20,7 @@ if [[ -z ${PYKCS11LIB+x} ]]; then
 fi
 
 
-if [[ -e ${PYKCS11LIB} ]]; then
+if [[ ! -e ${PYKCS11LIB} ]]; then
     echo 'PYKCS11LIB not found'
     exit 1
 fi
@@ -33,7 +33,8 @@ fi
 
 
 echo 'Test 22: PCSCD'
-if (( $(pidof /usr/sbin/pcscd) > 0 )); then
+pid=$(pidof /usr/sbin/pcscd)
+if (( $? == 1 )); then
     echo 'pcscd process not running'
     exit 1
 fi
@@ -48,7 +49,7 @@ fi
 
 
 echo 'Test 24: Login to HSM'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN --show-info \
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN --show-info 2>&1 \
     | grep 'present token'
 if (( $? > 0 )); then
     pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN --show-info
@@ -85,7 +86,7 @@ if (( $? > 0 )); then
 fi
 
 
-echo 'Test 28: List objects using PyKCS11'
+echo 'Test 28: Count objects using PyKCS11'
 /tests/pykcs11_getkey.py --pin=$PYKCS11PIN --slot=0 --lib=$PKCS11_CARD_DRIVER \
     | grep -a -c '=== Object '
 if (( $? > 0 )); then

@@ -34,7 +34,7 @@ get_commandline_args() {
 
 check_mandatory_args() {
     [[ -z "$CERT" ]] && usage && echo "missing option -c" && exit 1
-    openssl x509 -inform DER -in $CERT --noout
+    openssl x509 -inform DER -in $CERT -noout
     (( $? > 0 )) && echo 'certificate file must be a valid X.509 cert in DER format' && exit 2
     [[ -z "$PRIVKEY" ]] && usage && echo "missing option -k" && exit 3
     openssl rsa -inform DER -in $PRIVKEY -check 
