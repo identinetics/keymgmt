@@ -35,13 +35,16 @@ get_commandline_opts() {
 
 usage() {
     cat << EOF
-        usage: $0 [-k <NNNN>] [-n <key name>] [-v] [-s <X509 subject>]
+        Usage: $0 [-k <NNNN>] [-n <key name>] [-v] [-s <X509 subject>]
           -c  Use certificate as CA (basicConstraints:CA=TRUE)
           -h  print this help text
           -k  keysize (default: $keysize)
           -n  file name of key and certificate (default: $keyname)
           -v  verbose
           -s  x509 subject DN (default: $x509subject)
+
+        Example:
+           $0 -v -s "/C=AT/ST=Wien/L=Wien/O=Testfirma/OU=IT/CN=MDAGGR" -n mdaggr
 EOF
 }
 
@@ -82,13 +85,15 @@ create_keypair_and_certificate() {
     "
     cmd2="openssl x509 -inform PEM -in /ramdisk/${keyname}_crt.pem -outform DER -out /ramdisk/${keyname}_crt.der"
     cmd3="openssl rsa -in /ramdisk/${keyname}_key_pkcs8.pem -out /ramdisk/${keyname}_key_pkcs1.pem"
-    cmd4="openssl pkcs12 -export -out /ramdisk/${keyname}_crt.p12 -in /ramdisk/${keyname}_crt.pem -inkey /ramdisk/${keyname}_key_pkcs1.pem"
+    cmd4="openssl rsa -in /ramdisk/${keyname}_key_pkcs1.pem --outform DER -out /ramdisk/${keyname}_key.der"
+    cmd5="openssl pkcs12 -export -out /ramdisk/${keyname}_crt.p12 -in /ramdisk/${keyname}_crt.pem -inkey /ramdisk/${keyname}_key_pkcs1.pem"
 
     if [ "$verbose" == "True" ]; then
         echo $cmd1
         echo $cmd2
         echo $cmd3
         echo $cmd4
+        echo $cmd5
     fi
 
     tmpname=/tmp/$(basename $0.tmp)
@@ -96,10 +101,13 @@ create_keypair_and_certificate() {
     bash $tmpname
     $cmd2
     $cmd3
-    echo "create PKCS#12 certificate file including private key"
     $cmd4
+    echo "create PKCS#12 certificate file including private key"
+    $cmd5
     # provide the old pkcs1 private key format in addition to pkcs8
-    chmod 600 /ramdisk/${keyname}_key_*.pem /ramdisk/${keyname}_crt.p12
+    chmod 600 /ramdisk/${keyname}_key_*.pem \
+              /ramdisk/${keyname}_key_*.der \
+              /ramdisk/${keyname}_crt.p12
 }
 
 

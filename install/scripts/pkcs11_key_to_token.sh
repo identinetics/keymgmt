@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 main() {
     get_commandline_args $@
@@ -12,12 +12,12 @@ main() {
 
 
 get_commandline_args() {
-    while getopts ":c:dik:n:p:s:t:v" opt; do
+    while getopts ":c:dik:l:n:p:s:t:v" opt; do
       case $opt in
         c) CERT=$OPTARG;;
         d) DRYRUN='True'; verbose="True";;
-        k) PRIVKEY=$OPTARG;;
         i) INIT='True';;
+        k) PRIVKEY=$OPTARG;;
         l) CERTLABELOPT="-l $OPTARG";;
         n) TOKENLABEL=$OPTARG;;
         p) PKCS11_CARD_DRIVER=$OPTARG;;
@@ -33,18 +33,22 @@ get_commandline_args() {
 
 
 check_mandatory_args() {
-    [ -z "$CERT" ] && usage && echo "missing option -c" && exit 0
-    [ -z "$PRIVKEY" ] && usage && echo "missing option -k" && exit 0
-    [ -z "$TOKENLABEL" ] && usage && echo "missing option -n" && exit 0
-    [ -z "$SOPIN" ]  && ! $INIT  && usage && echo "option -s required with -i" && exit 0
-    [ -z "$USERPIN" ] && usage && echo "missing option -t" && exit 0
+    [[ -z "$CERT" ]] && usage && echo "missing option -c" && exit 1
+    openssl x509 -inform DER -in $CERT --noout
+    (( $? > 0 )) && echo 'certificate file must be a valid X.509 cert in DER format' && exit 2
+    [[ -z "$PRIVKEY" ]] && usage && echo "missing option -k" && exit 3
+    openssl rsa -inform DER -in $PRIVKEY -check 
+    (( $? > 0 )) && echo 'private key must be a valid RSA key in DER format' && exit 4
+    [[ -z "$TOKENLABEL" ]] && usage && echo "missing option -n" && exit 5
+    [[ -z "$SOPIN" ]]  && ! $INIT  && usage && echo "option -s required with -i" && exit 6
+    [[ -z "$USERPIN" ]] && usage && echo "missing option -t" && exit 7
 }
 
 
 usage() {
     cat << EOF
         Transfer certificate + private key to PKCS#11 Token
-        usage: $0 [-i] [-l <label> ] -n <Token Name> [-p <PKCS#11 driver>] [-s <SO PIN>] -t <User PIN> [-v]
+        usage: $0 -c Cert File [-d ] [-i] [-l Object Label ] -k Key File -n Token Name [-p PKCS#11 driver] -s SO PIN -t User PIN [-v]
           -c  Certifiate file
           -d  Dry run: print commands but do not execute
           -h  print this help text
@@ -72,22 +76,22 @@ initialize_token() {
 
 write_key_to_token() {
     echo 'writing certificate'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN -w $CERT --type cert $CERTLABELOPT"
+    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --write-object $CERT --type cert $CERTLABELOPT"
     run_command
     echo 'writing private key'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN -w $PRIVKEY --type privkey $CERTLABELOPT"
+    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --write-object $PRIVKEY --type privkey $CERTLABELOPT"
     run_command
     echo 'Checking objects on card'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login -O --pin $USERPIN"
+    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --list-objects"
     run_command
 }
 
 
 run_command() {
-    if [ $verbose ]; then
+    if [[ $verbose ]]; then
         echo $cmd; echo
     fi
-    if [ ! $DRYRUN ]; then
+    if [[ ! $DRYRUN ]]; then
         $cmd
     fi
 }
