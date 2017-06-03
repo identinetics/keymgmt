@@ -49,11 +49,11 @@ usage() {
     cat << EOF
         Transfer certificate + private key to PKCS#11 Token
         usage: $0 -c Cert File [-d ] [-i] [-l Object Label ] -k Key File -n Token Name [-p PKCS#11 driver] -s SO PIN -t User PIN [-v]
-          -c  Certifiate file
+          -c  Certifiate file (DER)
           -d  Dry run: print commands but do not execute
           -h  print this help text
           -i  initialize token before writing key
-          -k  Private key file
+          -k  Private key file (DER)
           -l  Certificate/private key label
           -n  Token Name
           -s  Security Officer PIN

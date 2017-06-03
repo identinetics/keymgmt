@@ -14,20 +14,20 @@ fi
 
 
 echo 'Test 21: PKCS11 driver lib'
-if [[ -z ${PYKCS11LIB+x} ]]; then
-    echo 'PYKCS11LIB not set - failed HSM test'
+if [[ -z ${PKCS11_CARD_DRIVER+x} ]]; then
+    echo 'PKCS11_CARD_DRIVER not set - failed HSM test'
     exit 1
 fi
 
 
-if [[ ! -e ${PYKCS11LIB} ]]; then
-    echo 'PYKCS11LIB not found'
+if [[ ! -e ${PKCS11_CARD_DRIVER} ]]; then
+    echo 'PKCS11_CARD_DRIVER not found'
     exit 1
 fi
 
 
-if [[ -z ${PYKCS11PIN+x} ]]; then
-    echo 'PYKCS11PIN not set - failed HSM test'
+if [[ -z ${USERPIN+x} ]]; then
+    echo 'USERPIN not set - failed HSM test'
     exit 1
 fi
 
@@ -40,7 +40,7 @@ if (( $? == 1 )); then
 fi
 
 
-echo 'Test 23: HSM Token'
+echo 'Test 23: HSM PKCS#11 device'
 pkcs11-tool --module $PKCS11_CARD_DRIVER --list-token-slots | grep "$HSMP11DEVICE"
 if (( $? > 0 )); then
     echo 'HSM Token not connected'
@@ -49,17 +49,17 @@ fi
 
 
 echo 'Test 24: Login to HSM'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN --show-info 2>&1 \
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --show-info 2>&1 \
     | grep 'present token'
 if (( $? > 0 )); then
-    pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN --show-info
+    pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --show-info
     echo 'Login failed'
     exit 1
 fi
 
 
 echo 'Test 25: List certificate(s)'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN --list-objects  --type cert \
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --list-objects  --type cert \
     | grep 'Certificate Object'
 if (( $? > 0 )); then
     echo 'No certificate found'
@@ -68,7 +68,7 @@ fi
 
 
 echo 'Test 26: List private key(s)'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN --list-objects  --type privkey \
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --list-objects  --type privkey \
     | grep 'Private Key Object'
 if (( $? > 0 )); then
     echo 'No private key found'
@@ -78,7 +78,7 @@ fi
 
 echo 'Test 27: Sign test data'
 echo "foo" > /tmp/bar
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $PYKCS11PIN \
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN \
     --sign --input /tmp/bar --output /tmp/bar.sig
 if (( $? > 0 )); then
     echo 'Signature failed'
@@ -87,7 +87,8 @@ fi
 
 
 echo 'Test 28: Count objects using PyKCS11'
-/tests/pykcs11_getkey.py --pin=$PYKCS11PIN --slot=0 --lib=$PKCS11_CARD_DRIVER \
+
+/tests/pykcs11_getkey.py --pin=$USERPIN --slot=0 --lib=$PKCS11_CARD_DRIVER \
     | grep -a -c '=== Object '
 if (( $? > 0 )); then
     echo 'Listing HSM token object with PyKCS11 lib failed'

@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-#
+
+set -e
  
-[ -z "$TOKENPW" ] && TOKENPW='secret1'
-[ -z "$SecurityOfficerPIN" ] && SecurityOfficerPIN='secret2'
+[ -z "$USERPIN" ] && USERPIN='Secret.1'
+[ -z "$SOPIN" ] && SOPIN='Secret.2'
+
 echo 'Initializing Token'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --init-token --label test --pin $TOKENPW --so-pin $SecurityOfficerPIN || exit -1
+pkcs11-tool --module $PKCS11_CARD_DRIVER --init-token --label test --pin $USERPIN --so-pin $SOPIN
 
 echo 'Initializing User PIN'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login --init-pin --pin $TOKENPW --so-pin $SecurityOfficerPIN
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --init-pin --pin $USERPIN --so-pin $SOPIN
 
 echo 'Generating RSA key'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login --keypairgen --key-type rsa:2048 -d 1 --label test --pin $TOKENPW || exit -1
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --keypairgen --key-type rsa:2048 -d 1 --label test --pin $USERPIN
 
 echo 'Checking objects on card'
-pkcs11-tool --module $PKCS11_CARD_DRIVER --login -O --pin $TOKENPW || exit -1
+pkcs11-tool --module $PKCS11_CARD_DRIVER --login --list-objects --pin $USERPIN

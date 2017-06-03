@@ -1,7 +1,7 @@
 = Key Management App for LiveCD
 
-This Docker application supports verios smartcard key management tools. It is intended to be
-started from the PVZDLiveCD.
+This Docker application supports smartcard key management tools from GPG and OpenSC. It is
+intended to be started from the PVZDLiveCD.
 
 
 == Supported Smart Cards
@@ -9,13 +9,32 @@ There is out-of-the box support for cards, such as:
 
 - OpenPGP card
 - JavaCard with installed Muscle applet
-- other PKI smartcarda supported by OpenSC
+- other PKI smartcards supported by OpenSC
 
 To install a proprieatary smart card driver create an image based on this one and include the
-driver installation in the Dockerfile.
+driver installation in the Dockerfile. An example for Safenet eToken Pro is in the keymgmt-safenetac
+project.
 
 Commands use PKCS11_CARD_DRIVER to point to the card driver.
 The default value is '/usr/lib64/pkcs11/opensc-pkcs11.so'.
+
+== RSA key generation for PKCS#11
+
+Some smartcard-based HSMs do not support the transfer of on-card generated keys to other devices.
+For those devices the approach is to generate keys off-card and upload the later. Doing this
+on an air-gapped LiveCD-based system is recommended then.
+
+=== Key-to-card approach
+
+Example how to genrate keys and copy to card:
+
+    ./dscripts/run.sh -i  # start container if not yet running
+    /scripts/x509_create_keys_on_disk.sh -n metadata -s /C=AT/ST=Wien/L=Wien/O=Testfirma/OU=IT/CN=localhost
+    /scripts/pkcs11_key_to_token.sh -c metadata_crt.der -i -k metadata_key.der -l mdsign -n test -s Secret.2 -t Secret.1 -v
+
+=== Key-on-card approach
+
+    /scripts/pkcs11_key_to_token.sh -c metadata_crt.der -i -k metadata_key.der -l mdsign -n test -s Secret.2 -t Secret.1 -v
 
 == GPG Support
 
