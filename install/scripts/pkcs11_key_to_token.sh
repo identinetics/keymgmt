@@ -34,10 +34,12 @@ get_commandline_args() {
 
 check_mandatory_args() {
     [[ -z "$CERT" ]] && usage && echo "missing option -c" && exit 1
+    echo 'testing x509 certificate'
     openssl x509 -inform DER -in $CERT -noout
     (( $? > 0 )) && echo 'certificate file must be a valid X.509 cert in DER format' && exit 2
     [[ -z "$PRIVKEY" ]] && usage && echo "missing option -k" && exit 3
-    openssl rsa -inform DER -in $PRIVKEY -check 
+    echo 'testing RSA private key'
+    openssl rsa -inform DER -in $PRIVKEY -check
     (( $? > 0 )) && echo 'private key must be a valid RSA key in DER format' && exit 4
     [[ -z "$TOKENLABEL" ]] && usage && echo "missing option -n" && exit 5
     [[ -z "$SOPIN" ]]  && ! $INIT  && usage && echo "option -s required with -i" && exit 6

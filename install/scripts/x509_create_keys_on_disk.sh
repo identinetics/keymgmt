@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 main() {
-    get_commandline_opts $@
+    get_commandline_opts "$@"
     mount_ramdisk
     set_openssl_config
     create_keypair_and_certificate
@@ -103,8 +103,8 @@ create_keypair_and_certificate() {
     $cmd2
     $cmd3
     $cmd4
-    chmod 600 /ramdisk/${keyname}_key_*.pem \
-              /ramdisk/${keyname}_key_*.der
+    chmod 600 /ramdisk/${keyname}_key*.pem \
+              /ramdisk/${keyname}_key.der
     if [[ "$pkcs12" == 'True' ]]; then
         echo "create PKCS#12 certificate file including private key"
         $cmd5
@@ -118,4 +118,4 @@ show_result() {
 }
 
 
-main $@
+main "$@"
