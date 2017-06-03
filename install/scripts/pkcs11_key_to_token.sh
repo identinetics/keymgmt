@@ -39,7 +39,7 @@ check_mandatory_args() {
     (( $? > 0 )) && echo 'certificate file must be a valid X.509 cert in DER format' && exit 2
     [[ -z "$PRIVKEY" ]] && usage && echo "missing option -k" && exit 3
     echo 'testing RSA private key'
-    openssl rsa -inform DER -in $PRIVKEY -check
+    openssl rsa -inform DER -in $PRIVKEY -check  -noout
     (( $? > 0 )) && echo 'private key must be a valid RSA key in DER format' && exit 4
     [[ -z "$TOKENLABEL" ]] && usage && echo "missing option -n" && exit 5
     [[ -z "$SOPIN" ]]  && ! $INIT  && usage && echo "option -s required with -i" && exit 6
