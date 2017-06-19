@@ -45,7 +45,7 @@ RUN mkdir -p /opt \
 
 # key management stuff
 RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libpth20 \
-    pinentry-curses paperkey qrencode scdaemon
+    pinentry-curses paperkey qrencode scdaemon zbar
 
 COPY install/scripts/* /scripts/
 COPY install/tests/* /tests/
