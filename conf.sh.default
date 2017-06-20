@@ -55,6 +55,23 @@ set_vol_mapping() {
     VOLLIST=''
     VOLMAPPING=''
     map_docker_volume "${CONTAINERNAME}.root" '/root' 'Z' $DOCKERVOL_ROOT
+    map_host_directory "$DOCKERVOL_ROOT/ramdisk" '/ramdisk' 'Z'
 }
+
+
+mount_ramdisk() {
+    RAMDISKPATH="${DOCKERVOL_ROOT}${CONTAINERNAME}/ramdisk"
+    if (( $(df | tail -n +2 | grep ^tmpfs | awk '{print $6}'| grep ^/${RAMDISKPATH}) != 0 )); then
+        ramdisk_mounted='False'
+    fi
+    if [[ $ramdisk_mounted == 'False' ]]; then
+        $sudo mkdir -p ${RAMDISKPATH}/ramdisk
+        $sudo mount -t ramfs -o size=1M ramfs ${RAMDISKPATH}
+        cd ${RAMDISKPATH}
+        [[ $PWD != "$RAMDISKPATH" ]] && zenity --error --text "could not make or mount ${RAMDISKPATH}" && exit 1
+        echo "Created ramdisk at ${RAMDISKPATH} (no size limit imposed - using up available RAM will freeze your system!)"
+    fi
+}
+
 
 main
