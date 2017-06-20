@@ -51,15 +51,20 @@ EOF
 
 
 mount_ramdisk() {
-    if [ $(id -u) -ne 0 ]; then
-        sudo="sudo"
+    RAMDISKPATH="/ramdisk"
+    df -Th | tail -n +2 | grep ramfs | awk '{print $7}'| grep ${RAMDISKPATH}
+    if (( $? != 0 )); then # ramfs not mounted at $RAMDISKPATH
+        $sudo mkdir -p ${RAMDISKPATH}/ramdisk
+        $sudo mount -t tmpfs -o size=1M tmpfs ${RAMDISKPATH}
+        cd ${RAMDISKPATH}
+        [[ $PWD != "$RAMDISKPATH" ]] && echo "could not make or mount ${RAMDISKPATH}" && exit 1
+        echo "Created ramfs at ${RAMDISKPATH} (no size limit imposed - using up available RAM will freeze your system!)"
+    else
+        if [[ ! -z "$(ls -A $RAMDISKPATH)" ]]; then
+            echo "delete contents of $RAMDISKPATH before creating new keys"
+            exit 1
+        fi
     fi
-    $sudo mkdir -p /ramdisk
-    $sudo mount -t tmpfs -o size=10M tmpfs /ramdisk
-    cd /ramdisk
-    [ $PWD != '/ramdisk' ] && echo "could not make or mount /ramdisk" && exit 1
-    echo "Created ramdisk at /ramdisk"
-
 }
 
 
