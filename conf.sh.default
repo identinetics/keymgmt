@@ -32,7 +32,7 @@ set_image_and_container_name() {
     PROJSHORT='keymgmt'
     export IMAGENAME="rhoerbe/$PROJSHORT${IMGID}"  # [a-z_0-9]
     export CONTAINERNAME="${IMGID}$PROJSHORT"
-    export DOCKER_REGISTRY='index.docker.io'
+    export DOCKER_REGISTRY=''
 }
 
 
