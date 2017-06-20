@@ -57,7 +57,7 @@ To recover the original key:
 === Print Key as QR-Code
 
     # generate eps
-    cat localhost_key_pkcs1.pem | qrencode –o localhost_key_pkcs1.eps
+    cat localhost_key_pkcs1.pem | base64 | qrencode –o localhost_key_pkcs1.png
     # spool to default printer: move file to docker host, spool from there
 
 

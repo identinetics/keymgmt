@@ -2,8 +2,8 @@
 
 set -e
  
-[ -z "$USERPIN" ] && USERPIN='Secret.1'
-[ -z "$SOPIN" ] && SOPIN='Secret.2'
+[ -z "$USERPIN" ] && export USERPIN='Secret.1'
+[ -z "$SOPIN" ] && export SOPIN='Secret.2'
 
 echo 'Initializing Token'
 pkcs11-tool --module $PKCS11_CARD_DRIVER --init-token --label test --pin $USERPIN --so-pin $SOPIN
