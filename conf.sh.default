@@ -62,10 +62,10 @@ set_vol_mapping() {
 
 mount_ramdisk() {
     RAMDISKPATH="${DOCKERVOL_ROOT}/${CONTAINERNAME}/ramdisk"
-    df -Th | tail -n +2 | grep ramfs | awk '{print $7}'| grep ${RAMDISKPATH}
+    df -Th | tail -n +2 | egrep "tmpfs|ramfs" >/dev/null | awk '{print $7}'| grep ${RAMDISKPATH}
     if (( $? != 0 )); then # ramfs not mounted at $RAMDISKPATH
         $sudo mkdir -p ${RAMDISKPATH}/ramdisk
-        $sudo mount -t tmpfs -o size=1M tmpfs ${RAMDISKPATH}
+        $sudo mount -t tmpfs -o size=1M tmpfs ${RAMDISKPATH}  # TODO tmpfs -> ramfs
         cd ${RAMDISKPATH}
         [[ $PWD != "$RAMDISKPATH" ]] && zenity --error --text "could not make or mount ${RAMDISKPATH}" && exit 1
         echo "Created ramdisk at ${RAMDISKPATH} (no size limit imposed - using up available RAM will freeze your system!)"

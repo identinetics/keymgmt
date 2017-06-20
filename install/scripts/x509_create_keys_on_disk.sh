@@ -52,7 +52,7 @@ EOF
 
 mount_ramdisk() {
     RAMDISKPATH="/ramdisk"
-    df -Th | tail -n +2 | grep ramfs | awk '{print $7}'| grep ${RAMDISKPATH}
+    df -Th | tail -n +2 | egrep "tmpfs|ramfs" | awk '{print $7}'| grep ${RAMDISKPATH} >/dev/null
     if (( $? != 0 )); then # ramfs not mounted at $RAMDISKPATH
         $sudo mkdir -p ${RAMDISKPATH}/ramdisk
         $sudo mount -t tmpfs -o size=1M tmpfs ${RAMDISKPATH}
