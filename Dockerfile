@@ -21,7 +21,7 @@ RUN yum -y install epel-release \
  && yum clean all
 
 # Crypto + Smart card support
-RUN yum -y install openssl engine_pkcs11 opensc p11tool pcsc-lite pcsc-scan usbutils gnutls-utils \
+RUN yum -y install openssl engine_pkcs11 opensc p11tool pcsc-lite pcsc-scan softhsm usbutils gnutls-utils \
  && yum clean all \
  && systemctl enable pcscd.service
 
