@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-HSMUSBDEVICE='Aladdin Knowledge Systems Token JC'  # output of lsusb
-HSMP11DEVICE='eToken 5110'                         # output of pkcs11-tool --list-token-slots
 
 SCRIPT=$(basename $0)
 SCRIPT=${SCRIPT%.*}
@@ -11,10 +9,14 @@ echo "    Logfiles in $LOGDIR"
 set +e
 
 echo 'Test 30: HSM USB device'
-lsusb | grep "$HSMUSBDEVICE" > $LOGDIR/test30.log
-if (( $? != 0 )); then
-    echo 'HSM USB device not found - failed HSM test'
-    exit 1
+if [[ $SOFTHSM ]]; then
+    echo 'Soft HSM configured'
+else
+    lsusb | grep "$HSMUSBDEVICE" > $LOGDIR/test30.log
+    if (( $? != 0 )); then
+        echo 'HSM USB device not found - failed HSM test'
+        exit 1
+    fi
 fi
 
 

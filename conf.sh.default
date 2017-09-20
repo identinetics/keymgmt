@@ -48,6 +48,10 @@ _set_run_args() {
     export ENVSETTINGS="-e PYKCS11LIB=$pkcs11lib"
     export ENVSETTINGS="$ENVSETTINGS -e PYKCS11PIN=Secret.1"  # configure token password
     export ENVSETTINGS="$ENVSETTINGS -e SOPIN=Secret.2"  # configure admin password
+    export ENVSETTINGS="$ENVSETTINGS -e HSMUSBDEVICE=none" # output of lsusb
+    export ENVSETTINGS="$ENVSETTINGS -e HSMP11DEVICE=SoftHSM"  # output of pkcs11-tool --list-token-slots
+    export ENVSETTINGS="$ENVSETTINGS -e SOFTHSM=True"  # causes test scripts to skip lsusb
+
     export STARTCMD=''
     enable_pkcs11
 }
