@@ -10,7 +10,6 @@ main() {
     _set_volume_root
     _set_image_and_container_name
     #_set_image_signature_args
-    _set_buildargs
     _set_run_args
 }
 
@@ -42,7 +41,7 @@ _set_image_signature_args() {
 }
 
 
-set_run_args() {
+_set_run_args() {
     export ENVSETTINGS="-e PKCS11_CARD_DRIVER=/usr/lib64/libetvTokenEngine.so"  # Safenet eTokenPro
     export ENVSETTINGS="$ENVSETTINGS -e USERPIN=Secret.1"  # configure user password
     export ENVSETTINGS="$ENVSETTINGS -e PYKCS11PIN=Secret.1"  # configure token password
@@ -54,9 +53,12 @@ set_run_args() {
 
 
 set_vol_mapping() {
+    # Create docker volume (-> map_docker_volume) or map a host dir (-> map_host_directory)
+    # In both cases create a shortcut in the shortcut directory (DOCKERVOL_SHORT, DOCKERLOG_SHORT)
+    mode=$1  # create (used by run.sh)/list (used by manage.sh)
     VOLLIST=''
     VOLMAPPING=''
-    map_docker_volume "${CONTAINERNAME}.root" '/root' 'Z' $DOCKERVOL_ROOT
+    map_docker_volume $mode "${CONTAINERNAME}.root" '/root' 'Z' $DOCKERVOL_ROOT
     mount_ramdisk
     map_host_directory "${RAMDISKPATH}" '/ramdisk' 'Z'
 }
