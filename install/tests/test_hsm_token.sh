@@ -55,7 +55,23 @@ if (( $? > 0 )); then
 fi
 
 
-echo 'Test 34: Login to HSM'
+echo 'Test 34: Initializing HSM Token'
+pkcs11-tool --module $PYKCS11LIB --init-token --label test --pin $PYKCS11PIN --so-pin $SOPIN
+if (( $? > 0 )); then
+    echo "HSM Token not initailized, failed with code $?"
+    exit 1
+fi
+
+
+echo 'Test 35: Initializing User PIN'
+pkcs11-tool --module $PYKCS11LIB --login --init-pin --pin $PYKCS11PIN --so-pin $SOPIN
+if (( $? > 0 )); then
+    echo "User PIN not initailized, failed with code $?"
+    exit 1
+fi
+
+
+echo 'Test 36: Login to HSM'
 pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --show-info 2>&1 \
     | grep 'present token' > $LOGDIR/test34.log
 if (( $? > 0 )); then
@@ -65,7 +81,7 @@ if (( $? > 0 )); then
 fi
 
 
-echo 'Test 35: List certificate(s)'
+echo 'Test 37: List certificate(s)'
 pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects  --type cert 2>&1 \
     | grep 'Certificate Object' > $LOGDIR/test35.log
 if (( $? > 0 )); then
@@ -74,7 +90,7 @@ if (( $? > 0 )); then
 fi
 
 
-echo 'Test 36: List private key(s)'
+echo 'Test 38: List private key(s)'
 pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects  --type privkey 2>&1 \
     | grep 'Private Key Object' > $LOGDIR/test36.log
 if (( $? > 0 )); then
@@ -83,7 +99,7 @@ if (( $? > 0 )); then
 fi
 
 
-echo 'Test 37: Sign test data'
+echo 'Test 39: Sign test data'
 echo "foo" > /tmp/bar
 pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN  \
     --sign --input /tmp/bar --output /tmp/bar.sig > $LOGDIR/test38.log 2>&1
@@ -93,7 +109,7 @@ if (( $? > 0 )); then
 fi
 
 
-echo 'Test 38: Count objects using PyKCS11'
+echo 'Test 40: Count objects using PyKCS11'
 
 /tests/pykcs11_getkey.py --pin=$PYKCS11PIN --slot=0 --lib=$PYKCS11LIB 2>&1 \
     | grep -a -c '=== Object ' > $LOGDIR/test38.log 2>&1
@@ -102,7 +118,7 @@ if (( $? > 0 )); then
     exit 1
 fi
 
-echo 'Test 39: List objects and PKCS11-URIs with p11tool'
+echo 'Test 41: List objects and PKCS11-URIs with p11tool'
 
 export GNUTLS_PIN=$PYKCS11PIN
 p11tool --provider $PYKCS11LIB --list-all --login pkcs11:token=testtoken;id=%01
