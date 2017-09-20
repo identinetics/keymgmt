@@ -18,7 +18,7 @@ get_commandline_args() {
         d) DRYRUN='True'; verbose="True";;
         i) INIT='True';;
         k) PRIVKEY=$OPTARG;;
-        l) CERTLABELOPT="-l $OPTARG";;
+        l) CERTLABELOPT="--label $OPTARG";;
         n) TOKENLABEL=$OPTARG;;
         p) PYKCS11LIB=$OPTARG;;
         s) SOPIN=$OPTARG;;
@@ -33,7 +33,7 @@ get_commandline_args() {
 
 
 check_mandatory_args() {
-    [[ -z "$CERT" ]] && usage && echo "missing option -c" && exit 1
+    [[ -z "$CERT" ]] && usage && echakto "missing option -c" && exit 1
     echo 'testing x509 certificate'
     openssl x509 -inform DER -in $CERT -noout
     (( $? > 0 )) && echo 'certificate file must be a valid X.509 cert in DER format' && exit 2

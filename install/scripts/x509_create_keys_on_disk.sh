@@ -61,7 +61,7 @@ mount_ramdisk() {
         echo "Created ramfs at ${RAMDISKPATH} (no size limit imposed - using up available RAM will freeze your system!)"
     else
         if [[ ! -z "$(ls -A $RAMDISKPATH)" ]]; then
-            echo "delete contents of $RAMDISKPATH before creating new keys"
+            echo "Found key files - aborted. Delete contents of $RAMDISKPATH before creating new keys"
             exit 1
         fi
     fi
