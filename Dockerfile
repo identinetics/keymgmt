@@ -1,6 +1,6 @@
 FROM centos:centos7
 LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
-      version="0.4.0" \
+      version="0.5.0" \
       didi_dir="https://raw.githubusercontent.com/identinetics/keymgmt/master/didi" \
       capabilities=''
 
@@ -20,8 +20,8 @@ RUN yum -y install epel-release \
  && yum -y install xorg-x11-xinit xorg-x11-fonts-100dpi xterm \
  && yum clean all
 
-# Smart card support
-RUN yum -y install opensc openssl pcsc-lite pcsc-scan usbutils \
+# Crypto + Smart card support
+RUN yum -y install openssl engine_pkcs11 opensc p11tool pcsc-lite pcsc-scan usbutils gnutls-utils \
  && yum clean all \
  && systemctl enable pcscd.service
 
