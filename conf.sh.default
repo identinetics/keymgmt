@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
 
-# settings for docker build, run and exec
-
 main() {
     SCRIPTDIR=$(cd $(dirname $BASH_SOURCE[0]) && pwd)
-    source $SCRIPTDIR/dscripts/conf_lib.sh  # load library functions
-
+    source $SCRIPTDIR/dscripts/conf_lib.sh  $@         # load library functions
+    configlib_version=2  # compatible version of conf_lib.sh
+    check_version $configlib_version
+    # do_not_build $@ # uncomment this line to pull/load image
     init_sudo
-    set_volume_root
-    set_image_and_container_name
-    set_image_signature_args
-    set_run_args
-    set_vol_mapping
-    #enable_x11_client
+    _set_volume_root
+    _set_image_and_container_name
+    #_set_image_signature_args
+    _set_buildargs
+    _set_run_args
 }
 
 
-set_volume_root() {
-    DOCKERVOL_ROOT='/root/dv'
-    if [ "$TRAVIS" == "true" ]; then
-        DOCKERVOL_ROOT='./dv';
-        DOCKERLOG_ROOT='./dl';
-    fi
+_set_volume_root() {
+    # container volumes mounted to host paths, or symlinks to docker volumes
+    DOCKERVOL_SHORT='./dv'
+    DOCKERLOG_SHORT='./dl'
+    mkdir -p $DOCKERVOL_SHORT $DOCKERLOG_SHORT
+    DOCKER_VOLUME_ROOT='/var/lib/docker/volumes'  # hard coded - check for your config if applicable!
+    #export DOCKERFILE_DIR=  # set this if the Dockerfile is not in the directory containing the dscripts subproject
 }
 
 
-set_image_and_container_name() {
-    # This IMGID qualifies image, container, user and IP adddress; this is helpful for managing
+_set_image_and_container_name() {
+    # IMGID qualifies image, container, user and IP adddress; this is helpful for managing
     # processes on the docker host etc.
     IMGID=''
     PROJSHORT='keymgmt'
@@ -36,7 +36,7 @@ set_image_and_container_name() {
 }
 
 
-set_image_signature_args() {
+_set_image_signature_args() {
     export DIDI_SIGNER='rh@identinetics.com'  # PGP uid
     export GPG_SIGN_OPTIONS='--default-key 904F1906'
 }
@@ -45,7 +45,9 @@ set_image_signature_args() {
 set_run_args() {
     export ENVSETTINGS="-e PKCS11_CARD_DRIVER=/usr/lib64/libetvTokenEngine.so"  # Safenet eTokenPro
     export ENVSETTINGS="$ENVSETTINGS -e USERPIN=Secret.1"  # configure user password
+    export ENVSETTINGS="$ENVSETTINGS -e PYKCS11PIN=Secret.1"  # configure token password
     export ENVSETTINGS="$ENVSETTINGS -e SOPIN=Secret.2"  # configure admin password
+    export ENVSETTINGS="$ENVSETTINGS -e PYKCS11LIB=/usr/lib64/libetvTokenEngine.so"  # enable this for Safenet eTokePro
     export STARTCMD='bash'  # unset or blank to use image default
     enable_pkcs11
 }
