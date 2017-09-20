@@ -18,7 +18,7 @@ _set_volume_root() {
     # container volumes mounted to host paths, or symlinks to docker volumes
     DOCKERVOL_SHORT='./dv'
     DOCKERLOG_SHORT='./dl'
-    mkdir -p $DOCKERVOL_SHORT $DOCKERLOG_SHORT
+    mkdir -p $$DOCKERVOL_ROOT $DOCKERVOL_LOG
     DOCKER_VOLUME_ROOT='/var/lib/docker/volumes'  # hard coded - check for your config if applicable!
     #export DOCKERFILE_DIR=  # set this if the Dockerfile is not in the directory containing the dscripts subproject
 }
@@ -60,11 +60,11 @@ create_intercontainer_network() {
 
 setup_vol_mapping() {
     # Create docker volume (-> map_docker_volume) or map a host dir (-> map_host_directory)
-    # In both cases create a shortcut in the shortcut directory (DOCKERVOL_SHORT, DOCKERLOG_SHORT)
+    # In both cases create a shortcut in the shortcut directory ($DOCKERVOL_ROOT, DOCKERLOG_SHORT)
     mode=$1  # create (used by run.sh)/list (used by manage.sh)
     VOLLIST=''
     VOLMAPPING=''
-    map_docker_volume $mode "${CONTAINERNAME}.root" '/root' 'Z' $DOCKERVOL_ROOT
+    map_docker_volume $mode "${CONTAINERNAME}.root" '/root' 'Z' $DOCKERVOL_SHORT
     mount_ramdisk
     map_host_directory "${RAMDISKPATH}" '/ramdisk' 'Z'
 }
