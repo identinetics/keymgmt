@@ -15,7 +15,7 @@ To install a proprieatary smart card driver create an image based on this one an
 driver installation in the Dockerfile. An example for Safenet eToken Pro is in the keymgmt-safenetac
 project.
 
-Commands use PKCS11_CARD_DRIVER to point to the card driver.
+Commands use PYKCS11LIB to point to the card driver.
 The default value is '/usr/lib64/pkcs11/opensc-pkcs11.so'.
 
 == RSA key generation for PKCS#11

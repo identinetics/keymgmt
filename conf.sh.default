@@ -42,17 +42,23 @@ _set_image_signature_args() {
 
 
 _set_run_args() {
-    export ENVSETTINGS="-e PKCS11_CARD_DRIVER=/usr/lib64/libetvTokenEngine.so"  # Safenet eTokenPro
-    export ENVSETTINGS="$ENVSETTINGS -e USERPIN=Secret.1"  # configure user password
+    pkcs11lib=/usr/lib64/libsofthsm2.so # SoftHSM2
+    #pkcs11lib='/usr/lib64/pkcs11/opensc-pkcs11.so' # OpenSC generic driver
+
+    export ENVSETTINGS="-e PYKCS11LIB=$pkcs11lib"
     export ENVSETTINGS="$ENVSETTINGS -e PYKCS11PIN=Secret.1"  # configure token password
     export ENVSETTINGS="$ENVSETTINGS -e SOPIN=Secret.2"  # configure admin password
-    export ENVSETTINGS="$ENVSETTINGS -e PYKCS11LIB=/usr/lib64/libetvTokenEngine.so"  # enable this for Safenet eTokePro
-    export STARTCMD='bash'  # unset or blank to use image default
+    export STARTCMD=''
     enable_pkcs11
 }
 
 
-set_vol_mapping() {
+create_intercontainer_network() {
+    export NETWORKSETTINGS=""
+}
+
+
+setup_vol_mapping() {
     # Create docker volume (-> map_docker_volume) or map a host dir (-> map_host_directory)
     # In both cases create a shortcut in the shortcut directory (DOCKERVOL_SHORT, DOCKERLOG_SHORT)
     mode=$1  # create (used by run.sh)/list (used by manage.sh)

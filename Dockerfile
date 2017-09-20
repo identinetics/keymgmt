@@ -49,10 +49,9 @@ RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libp
 
 COPY install/scripts/* /scripts/
 COPY install/tests/* /tests/
-RUN mkdir -p /usr/local/etc/gpg /etc/sudoers.d /etc/profile.d
+COPY install/etc/* /etc/
+RUN mkdir -p /usr/local/etc/gpg
 COPY install/gpg/* /usr/local/etc/gpg/
-COPY install/sudoers.d/* /etc/sudoers.d/
-COPY install/profile.d/* /etc/profile.d/
 
 ARG USERNAME=liveuser
 ARG UID=1000
@@ -61,8 +60,6 @@ RUN groupadd --gid $UID $USERNAME \
  && chown $USERNAME:$USERNAME /run /var/log /scripts/* \
  && chmod +x /scripts/* /tests/*
 
-# Generic driver
-ENV PKCS11_CARD_DRIVER='/usr/lib64/pkcs11/opensc-pkcs11.so'
-
+VOLUME /root /ramdisk
 # need start as root to start pcscd
-CMD /scripts/start.sh
+CMD ["/scripts/start.sh"]

@@ -20,9 +20,9 @@ get_commandline_args() {
         k) PRIVKEY=$OPTARG;;
         l) CERTLABELOPT="-l $OPTARG";;
         n) TOKENLABEL=$OPTARG;;
-        p) PKCS11_CARD_DRIVER=$OPTARG;;
+        p) PYKCS11LIB=$OPTARG;;
         s) SOPIN=$OPTARG;;
-        t) USERPIN=$OPTARG;;
+        t) PYKCS11PIN=$OPTARG;;
         v) verbose="True";;
         :) echo "Option -$OPTARG requires an argument"; exit 1;;
         *) usage; exit 0;;
@@ -43,7 +43,7 @@ check_mandatory_args() {
     (( $? > 0 )) && echo 'private key must be a valid RSA key in DER format' && exit 4
     [[ -z "$TOKENLABEL" ]] && usage && echo "missing option -n" && exit 5
     [[ -z "$SOPIN" ]]  && ! $INIT  && usage && echo "option -s required with -i" && exit 6
-    [[ -z "$USERPIN" ]] && usage && echo "missing option -t" && exit 7
+    [[ -z "$PYKCS11PIN" ]] && usage && echo "missing option -t" && exit 7
 }
 
 
@@ -59,7 +59,7 @@ usage() {
           -l  Certificate/private key label
           -n  Token Name
           -s  Security Officer PIN
-          -p  Path to library of PKCS#11 driver (default: $PKCS11_CARD_DRIVER)
+          -p  Path to library of PKCS#11 driver (default: $PYKCS11LIB)
           -t  User PIN
           -v  verbose
 EOF
@@ -68,23 +68,23 @@ EOF
 
 initialize_token() {
     echo 'Initializing Token'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --init-token --label $TOKENLABEL --pin $USERPIN --so-pin $SOPIN"
+    cmd="pkcs11-tool --module $PYKCS11LIB --init-token --label $TOKENLABEL --pin $PYKCS11PIN --so-pin $SOPIN"
     run_command
     echo 'Initializing User PIN'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --init-pin --pin $USERPIN --so-pin $SOPIN"
+    cmd="pkcs11-tool --module $PYKCS11LIB --login --init-pin --pin $PYKCS11PIN --so-pin $SOPIN"
     run_command
 }
 
 
 write_key_to_token() {
     echo 'writing certificate'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --write-object $CERT --type cert $CERTLABELOPT"
+    cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --write-object $CERT --type cert $CERTLABELOPT"
     run_command
     echo 'writing private key'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --write-object $PRIVKEY --type privkey $CERTLABELOPT"
+    cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --write-object $PRIVKEY --type privkey $CERTLABELOPT"
     run_command
     echo 'Checking objects on card'
-    cmd="pkcs11-tool --module $PKCS11_CARD_DRIVER --login --pin $USERPIN --list-objects"
+    cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects"
     run_command
 }
 

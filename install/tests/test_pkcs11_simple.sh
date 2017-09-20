@@ -27,32 +27,32 @@ init_sudo() {
 
 
 test_carddriver_setting() {
-    if [[ -z "$PKCS11_CARD_DRIVER" ]]; then
-        echo "Env variable PKCS11_CARD_DRIVER not set"
+    if [[ -z "$PYKCS11LIB" ]]; then
+        echo "Env variable PYKCS11LIB not set"
         exit 1
     fi
 }
 
 
 show_pkcs11_info() {
-    [ -z "$USERPIN" ] && USERPIN='Secret.1'
+    [ -z "$PYKCS11PIN" ] && PYKCS11PIN='Secret.1'
     echo
     echo "=== show token info ==="
-    pkcs11-tool --module $PKCS11_CARD_DRIVER --show-info
+    pkcs11-tool --module $PYKCS11LIB --show-info
     echo
     echo "=== show token slots ==="
-    pkcs11-tool --module $PKCS11_CARD_DRIVER --list-token-slots
+    pkcs11-tool --module $PYKCS11LIB --list-token-slots
     echo
     echo "=== show token objects ==="
-    pkcs11-tool --module $PKCS11_CARD_DRIVER --list-objects
+    pkcs11-tool --module $PYKCS11LIB --list-objects
     echo
     echo "=== test token ==="
-    pkcs11-tool --module $PKCS11_CARD_DRIVER --login -O --pin $USERPIN --test
+    pkcs11-tool --module $PYKCS11LIB --login -O --pin $PYKCS11PIN --test
 }
 
 
 run_pykcs11() {
-    export PYKCS11LIB=$PKCS11_CARD_DRIVER
+    export PYKCS11LIB=$PYKCS11LIB
     python ./pykcs11_getinfo.py
 }
 
