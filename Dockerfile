@@ -25,6 +25,10 @@ RUN yum -y install openssl engine_pkcs11 opensc p11tool pcsc-lite pcsc-scan soft
  && yum clean all \
  && systemctl enable pcscd.service
 
+# Java keytool with default crypto provider
+RUN yum -y install java-1.8.0-openjdk-devel.x86_64
+ENV JAVA_HOME=/etc/alternatives/jre_1.8.0_openjdk
+
 # python: pip, -devel
 RUN yum -y install python-pip python-devel \
  && yum clean all \

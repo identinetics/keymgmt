@@ -16,7 +16,7 @@ driver installation in the Dockerfile. An example for Safenet eToken Pro is in t
 project.
 
 Commands use PYKCS11LIB to point to the card driver.
-The default value is '/usr/lib64/pkcs11/opensc-pkcs11.so'.
+The default token is SoftHSMv2.
 
 == RSA key generation for PKCS#11
 

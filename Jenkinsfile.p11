@@ -20,8 +20,8 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                echo 'Testing GPG Card Signature - requires HW ..'
-                ./dscripts/run.sh -I /tests/test_gpg_card_sig.sh
+                echo 'Testing PKCS11 Token'
+                ./dscripts/run.sh -I /tests/test_hsm_token.sh
                 '''
             }
         }
