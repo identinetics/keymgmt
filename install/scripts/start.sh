@@ -9,14 +9,6 @@ if [ $(id -u) -ne 0 ]; then
     sudo='sudo'
 fi
 
-logger -p local0.info "Starting PC/SC Smartcard Service"
-$sudo /usr/sbin/pcscd
-
-#logger -p local0.info "Starting DBUS Service"
-#$sudo /bin/dbus-daemon --system --nofork --nopidfile
-
-#logger -p local0.info "Starting HAVEGE Entropy Service"
-#disabled because gpg2 --sign is failing with "signing failed: Operation cancelled"
-#$sudo /usr/sbin/haveged
+/startup_p11.sh
 
 exec bash
