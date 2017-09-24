@@ -1,230 +1,296 @@
 #!/usr/bin/env bash
 
+main() {
+    setup
+    run_tests
+}
 
-SCRIPT=$(basename $0)
-SCRIPT=${SCRIPT%.*}
-LOGDIR="/tmp/${SCRIPT%.*}"
-mkdir -p $LOGDIR
-echo "    Logfiles in $LOGDIR"
-set +e
 
-testid=10
-printf "Test ${testid}: HSM USB device"
-if [[ $SOFTHSM ]]; then
-    echo " .. skipping, Soft HSM configured "
-else
-    lsusb | grep "$HSMUSBDEVICE" > $LOGDIR/test${testid}.log
-    if (( $? != 0 )); then
-        echo -e "\n  HSM USB device not found - failed HSM test"
-        cat $LOGDIR/test${testid}.log
-        exit 1
+setup() {
+    SCRIPT=$(basename $0)
+    SCRIPT=${SCRIPT%.*}
+    LOGDIR="/tmp/${SCRIPT%.*}"
+    mkdir -p $LOGDIR
+    LOGFILE="/tmp/${SCRIPT%.*}.log"
+    echo "test_hsm_token.sh" > $LOGFILE
+    echo "== Logfile: $LOGFILE"
+    set +e
+}
+
+
+log_test_header() {
+    printf "Test ${testid}: ${test_purpose} "
+    echo "=======" >> $LOGFILE
+    echo "Test ${testid}: ${test_purpose}" >> $LOGFILE
+    echo "Command: ${test_cmd}" >> $LOGFILE
+    printf "Result:" >> $LOGFILE
+}
+
+
+log_newline() {
+    echo -e $1
+    echo -e $1 >> $LOGFILE
+}
+
+
+log_no_newline() {
+    printf $1
+    printf $1 >> $LOGFILE
+}
+
+
+run_tests() {
+    testid=10
+    test_purpose='detect HSM USB device'
+    test_cmd="lsusb | grep $HSMUSBDEVICE"
+    log_test_header
+    if [[ $SOFTHSM ]]; then
+        log_newline " .. skipping, Soft HSM configured"
     else
-        echo " .. OK"
-    fi
-fi
-
-#=============
-let testid=testid+1
-printf "Test ${testid}: PKCS11 driver lib"
-if [[ -z ${PYKCS11LIB+x} ]]; then
-    echo " .. ERROR: PYKCS11LIB not set - failed HSM test"
-    exit 1
-else
-    echo " .. OK"
-fi
-
-
-if [[ ! -e ${PYKCS11LIB} ]]; then
-    echo "PYKCS11LIB not found"
-    exit 1
-fi
-
-
-if [[ -z ${PYKCS11PIN+x} ]]; then
-    echo "PYKCS11PIN not set - failed HSM test"
-    exit 1
-fi
-
-
-#=============
-let testid=testid+1
-printf  "Test ${testid}: PCSCD running "
-if [[ $SOFTHSM ]]; then
-    echo " .. Soft HSM  - no pcscd needed"
-else
-    pid=$(pidof /usr/sbin/pcscd) > /dev/null
-    if (( $? == 1 )); then
-        (( $(id -u) == 0 )) || sudo='sudo'
-        echo " .. not found; starting pcscd"
-        $sudo /usr/sbin/pcscd
-        sleep 1
-        pid=$(pidof /usr/sbin/pcscd) > /dev/null
-        if (( $? == 1 )); then
-            echo " .. ERROR: pcscd process not running"
+        lsusb | grep $HSMUSBDEVICE > $LOGDIR/test${testid}.log
+        if (( $? != 0 )); then
+            log_newline "\n  HSM USB device not found - failed HSM test"
+            cat $LOGFILE/test${testid}.log | tee >> $LOGFILE
             exit 1
+        else
+            log_newline " .. OK"
         fi
-    else
-        echo " .. OK"
     fi
-fi
+
+    #=============
+    testid=11
+    test_purpose='PKCS11 driver lib, PYKCS11PIN'
+    test_cmd='-z ${PYKCS11LIB+x}'
+    log_test_header
+    if [[ -z ${PYKCS11LIB+x} ]]; then
+        log_newline " .. ERROR: PYKCS11LIB not set - failed HSM test"
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
 
 
-#=============
-let testid=testid+1
-printf  "Test ${testid}: HSM PKCS#11 device  "
-pkcs11-tool --module $PYKCS11LIB --list-token-slots | grep "$HSMP11DEVICE" 2>&1 \
-    > $LOGDIR/test${testid}.log
-if (( $? > 0 )); then
-    echo " .. ERROR: HSM Token not connected"
-    cat $LOGDIR/test${testid}.log
-    exit 1
-else
-    echo " .. OK"
-fi
+    if [[ ! -e ${PYKCS11LIB} ]]; then
+        log_newline "PYKCS11LIB not found"
+        exit 1
+    fi
 
 
-#=============
-let testid=testid+1
-printf  "Test ${testid}: Initializing HSM Token "
-pkcs11-tool --module $PYKCS11LIB --init-token --label test --so-pin $SOPIN \
-    > $LOGDIR/test${testid}.log 2>&1
-if (( $? > 0 )); then
-    echo " .. ERROR: HSM Token not initailized, failed with code $?"
-    cat $LOGDIR/test${testid}.log
-    exit 1
-else
-    echo " .. OK"
-fi
+    if [[ -z ${PYKCS11PIN+x} ]]; then
+        log_newline "PYKCS11PIN not set - failed HSM test"
+        exit 1
+    fi
 
 
-#=============
-let testid=testid+1
-printf  "Test ${testid}: Initializing User PIN "
-pkcs11-tool --module $PYKCS11LIB --login --init-pin --pin $PYKCS11PIN --so-pin $SOPIN \
-    > $LOGDIR/test${testid}.log 2>&1
-if (( $? > 0 )); then
-    echo " .. ERROR: User PIN not initialized, failed with code $?"
-    cat $LOGDIR/test${testid}.log
-    exit 1
-else
-    echo " .. OK"
-fi
+    #=============
+    testid=12
+    test_purpose='PCSCD running?'
+    test_cmd='pidof /usr/sbin/pcscd'
+    log_test_header
+    if [[ $SOFTHSM ]]; then
+        log_newline " .. Soft HSM  - no pcscd needed"
+    else
+        pid=$($test_cmd) > /dev/null
+        if (( $? == 1 )); then
+            (( $(id -u) == 0 )) || sudo='sudo'
+            log_newline " .. not found; starting pcscd"
+            $sudo /usr/sbin/pcscd
+            sleep 1
+            pid=$($test_cmd) > /dev/null
+            if (( $? == 1 )); then
+                log_newline " .. ERROR: pcscd process not running"
+                exit 1
+            fi
+        else
+            log_newline " .. OK"
+        fi
+    fi
 
 
-#=============
-let testid=testid+1
-printf  "Test ${testid}: Login to HSM"
-pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --show-info 2>&1 \
-    | grep 'present token' > $LOGDIR/test${testid}.log
-if (( $? > 0 )); then
-    pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --show-info
-    echo " .. ERROR: Login failed"
-    cat $LOGDIR/${testid}.log
-    exit 1
-else
-    echo " .. OK"
-fi
-
-#=============
-let testid=testid+1
-printf  "Test ${testid}a: create SW-certificate in ramdisk"
-rm -f /ramdisk/*
-/scripts/x509_create_keys_on_disk.sh -n testcert \
-    -s /C=AT/ST=Wien/L=Wien/O=TEST/OU=TEST/CN=testcert \
-    > $LOGDIR/test${testid}.log 2>&1
-if (( $? > 0 )); then
-    echo " .. ERROR: Creating SW-cert failed with code=$?"
-    cat $LOGDIR/test${testid}a.log
-    exit 1
-else
-    echo " .. OK"
-fi
-
-printf  "Test ${testid}b: write certificate + private key to HSM "
-/scripts/pkcs11_key_to_token.sh -c /ramdisk/testcert_crt.der -k /ramdisk/testcert_key.der \
-    -l mdsign -n test -s $SOPIN -t $PYKCS11PIN> $LOGDIR/test${testid}.log 2>&1
-if (( $? > 0 )); then
-    echo " .. ERROR: Writing key and certificate to HSM token failed with code=$?"
-    cat $LOGDIR/test${testid}b.log
-    exit 1
-else
-    echo " .. OK"
-fi
-
-
-#=============
-let testid=testid+1
-printf  "Test ${testid}: List certificate(s)"
-pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert \
-    | grep 'Certificate Object' 2>&1 > $LOGDIR/test${testid}.log
-if (( $? > 0 )); then
-    echo " .. ERROR: No certificate found"
-    exit 1
-else
-    echo " .. OK"
-fi
-
-
-#=============
-let testid=testid+1
-printf  "Test ${testid}: List private key(s)"
-pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects  --type privkey \
-    | grep 'Private Key Object' 2>&1  > $LOGDIR/test${testid}.log
-if (( $? > 0 )); then
-    echo " .. ERROR: No private key found"
-    cat $LOGDIR/test${testid}.log
-    exit 1
-else
-    echo " .. OK"
-fi
-
-#=============
-let testid=testid+1
-printf  "Test ${testid}: Sign test data"
-if [[ $SOFTHSM ]]; then
-    echo " .. skipping, SoftHSMv2 does not support signing"
-else
-    echo "foo" > /tmp/bar
-    pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN  \
-        --sign --input /tmp/bar --output /tmp/bar.sig > $LOGDIR/test${testid}.log
+    #=============
+    testid=13
+    test_purpose='HSM PKCS#11 device'
+    test_cmd="pkcs11-tool --module $PYKCS11LIB --list-token-slots | grep ${HSMP11DEVICE}"
+    log_test_header
+    pkcs11-tool --module $PYKCS11LIB --list-token-slots | grep $HSMP11DEVICE 2>&1 \
+        > $LOGDIR/test${testid}.log
     if (( $? > 0 )); then
-        echo " .. ERROR: Signature failed"
+        log_newline " .. ERROR: HSM Token not connected"
+        cat $LOGDIR/test${testid}.log  | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+
+    #=============
+    testid=14
+    test_purpose='Initializing HSM Token '
+    test_cmd="pkcs11-tool --module $PYKCS11LIB --init-token --label test --so-pin $SOPIN"
+    log_test_header
+    pkcs11-tool --module $PYKCS11LIB --init-token --label test --so-pin $SOPIN \
+        > $LOGDIR/test${testid}.log 2>&1
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: HSM Token not initialized, failed with code $?"
         cat $LOGDIR/test${testid}.log
         exit 1
     else
-        echo " .. OK"
+        log_newline " .. OK"
     fi
-fi
 
 
-#=============
-let testid=testid+1
-printf  "Test ${testid}: Count objects using PyKCS11"
+    #=============
+    testid=15
+    test_purpose='Initializing User PIN '
+    test_cmd="pkcs11-tool --module $PYKCS11LIB --login --init-pin --pin $PYKCS11PIN --so-pin $SOPIN"
+    log_test_header
+    #pkcs11-tool --module $PYKCS11LIB --login --init-pin --pin $PYKCS11PIN --so-pin $SOPIN
+    $test_cmd > $LOGDIR/test${testid}.log 2>&1
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: User PIN not initialized, failed with code $?"
+        cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
 
-obj_count=$(/tests/pykcs11_getkey.py --pin=$PYKCS11PIN --slot=0 --lib=$PYKCS11LIB | grep -a -c '=== Object ')
-if (( $obj_count != 2 )); then
-    echo " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
-    exit 1
-else
-    echo " .. OK"
-fi
+
+    #=============
+    testid=15
+    test_purpose='Login to HSM '
+    test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --show-info"
+    log_test_header
+    pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --show-info 2>&1 \
+        | grep 'present token' > $LOGDIR/test${testid}.log
+    if (( $? > 0 )); then
+        pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --show-info
+        log_newline " .. ERROR: Login failed"
+        cat $LOGDIR/${testid}.log
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+    #=============
+    testid=16
+    test_purpose='create SW-certificate in ramdisk '
+    test_cmd="/scripts/x509_create_keys_on_disk.sh -n testcert -s /C=AT/ST=Wien/L=Wien/O=TEST/OU=TEST/CN=testcert"
+    log_test_header
+    rm -f /ramdisk/*
+    /scripts/x509_create_keys_on_disk.sh -n testcert \
+        -s /C=AT/ST=Wien/L=Wien/O=TEST/OU=TEST/CN=testcert \
+        > $LOGDIR/test${testid}.log 2>&1
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: Creating SW-cert failed with code=$?"
+        cat $LOGDIR/test${testid}a.log | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+    #=============
+    testid=17
+    test_purpose='write certificate + private key to HSM '
+    test_cmd="/scripts/pkcs11_key_to_token.sh -c /ramdisk/testcert_crt.der -k /ramdisk/testcert_key.der -l mdsign -n test -s $SOPIN -t $PYKCS11PIN"
+    log_test_header
+    /scripts/pkcs11_key_to_token.sh -c /ramdisk/testcert_crt.der -k /ramdisk/testcert_key.der \
+        -l mdsign -n test -s $SOPIN -t $PYKCS11PIN > $LOGDIR/test${testid}.log 2>&1
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: Writing key and certificate to HSM token failed with code=$?"
+        cat $LOGDIR/test${testid}b.log | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
 
 
-#=============
-let testid=testid+1
-printf  "Test ${testid}: List objects and PKCS11-URIs with p11tool"
-export GNUTLS_PIN=$PYKCS11PIN
-p11tool --provider $PYKCS11LIB --list-all --login pkcs11: > $LOGDIR/test${testid}.log 2>&1
-obj_count=$(grep -c ^Object $LOGDIR/test${testid}.log)
-if (( $obj_count != 2 )); then
-    echo " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
-    exit 1
-else
-    echo " .. OK"
-fi
+    #=============
+    testid=18
+    test_purpose='List certificate on HSM device '
+    test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert | grep 'Certificate Object'"
+    log_test_header
+    pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert \
+        | grep 'Certificate Object' 2>&1 > $LOGDIR/test${testid}.log
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: No certificate found"
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
 
-#=============
-let testid=testid+1
-echo  "Test ${testid}: List objects with Java keytool (no test criterium defined yet)"
-# fit into single line:
-keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11 || true
+
+    #=============
+    testid=19
+    test_purpose='List private key on HSM device '
+    test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type privkey | grep 'Certificate Object'"
+    log_test_header
+    pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type privkey \
+        | grep 'Private Key Object' 2>&1  > $LOGDIR/test${testid}.log
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: No private key found"
+        cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+    #=============
+    testid=20
+    test_purpose='Sign test data '
+    test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --sign --input /tmp/bar --output /tmp/bar.sig"
+    log_test_header
+    if [[ $SOFTHSM ]]; then
+        log_newline " .. skipping, SoftHSMv2 does not support signing"
+    else
+        log_newline "foo" > /tmp/bar
+        pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN  \
+            --sign --input /tmp/bar --output /tmp/bar.sig > $LOGDIR/test${testid}.log
+        if (( $? > 0 )); then
+            log_newline " .. ERROR: Signature failed"
+            cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
+            exit 1
+        else
+            log_newline " .. OK"
+        fi
+    fi
+
+
+    #=============
+    testid=21
+    test_purpose='Count objects using PyKCS11 '
+    test_cmd="/tests/pykcs11_getkey.py --pin=$PYKCS11PIN --slot=0 --lib=$PYKCS11LIB | grep -a -c '=== Object '"
+    log_test_header
+    obj_count=$(/tests/pykcs11_getkey.py --pin=$PYKCS11PIN --slot=0 --lib=$PYKCS11LIB | grep -a -c '=== Object ')
+    if (( $obj_count != 2 )); then
+        log_newline " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+
+    #=============
+    testid=22
+    test_purpose='List objects and PKCS11-URIs with p11tool '
+    test_cmd="p11tool --provider $PYKCS11LIB --list-all --login pkcs11:"
+    log_test_header
+    export GNUTLS_PIN=$PYKCS11PIN
+    p11tool --provider $PYKCS11LIB --list-all --login pkcs11: > $LOGDIR/test${testid}.log 2>&1
+    obj_count=$(grep -c ^Object $LOGDIR/test${testid}.log)
+    if (( $obj_count != 2 )); then
+        log_newline " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+    #=============
+    testid=23
+    test_purpose='List objects with Java keytool (test not working yet) '
+    test_cmd="keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11"
+    log_test_header
+    # fit into single line:
+    keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11 || true
+}
+
+main $@
