@@ -48,14 +48,21 @@ fi
 
 #=============
 let testid=testid+1
-printf  "Test ${testid}: PCSCD"
+printf  "Test ${testid}: PCSCD running "
 if [[ $SOFTHSM ]]; then
     echo " .. Soft HSM  - no pcscd needed"
 else
     pid=$(pidof /usr/sbin/pcscd) > /dev/null
     if (( $? == 1 )); then
-        echo " .. ERROR: pcscd process not running"
-        exit 1
+        (( $(id -u) == 0 )) || sudo='sudo'
+        echo " .. not found; starting pcscd"
+        $sudo /usr/sbin/pcscd
+        sleep 1
+        pid=$(pidof /usr/sbin/pcscd) > /dev/null
+        if (( $? == 1 )); then
+            echo " .. ERROR: pcscd process not running"
+            exit 1
+        fi
     else
         echo " .. OK"
     fi
@@ -220,4 +227,4 @@ fi
 let testid=testid+1
 echo  "Test ${testid}: List objects with Java keytool (no test criterium defined yet)"
 # fit into single line:
-keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg /etc/softhsm_JCE.cfg -J-Djava.security.debug=sunpkcs11 || true
+keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11 || true
