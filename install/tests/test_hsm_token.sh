@@ -264,8 +264,8 @@ run_tests() {
     [[ $P11KIT_DESC ]] || die 'ERROR: P11KIT_DESC not set'
     $test_cmd > $LOGDIR/test${testid}.log 2>&1
     obj_count=$(grep -c $P11KIT_DESC $LOGDIR/test${testid}.log)
-    if (( $obj_count <= 1 )); then
-        die " .. ERROR: Found $obj_count; expected >=1 occurence(s) of '$P11KIT_DESC' in output of $test_cmd"
+    if (( $obj_count == 0 )); then
+        die " .. ERROR: expected >=1 occurence(s) of '$P11KIT_DESC' in output of $test_cmd"
     else
         log_newline " .. OK"
     fi
