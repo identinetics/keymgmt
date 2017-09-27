@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 main() {
+    printenv | sort
+    echo
     setup
     run_tests
 }
@@ -15,27 +17,6 @@ setup() {
     echo "test_hsm_token.sh" > $LOGFILE
     echo "== Logfile: $LOGFILE"
     set +e
-}
-
-
-log_test_header() {
-    printf "Test ${testid}: ${test_purpose} "
-    echo "=======" >> $LOGFILE
-    echo "Test ${testid}: ${test_purpose}" >> $LOGFILE
-    echo "Command: ${test_cmd}" >> $LOGFILE
-    printf "Result:" >> $LOGFILE
-}
-
-
-log_newline() {
-    echo -e $1
-    echo -e $1 >> $LOGFILE
-}
-
-
-log_no_newline() {
-    printf $1
-    printf $1 >> $LOGFILE
 }
 
 
@@ -63,22 +44,15 @@ run_tests() {
     test_cmd='-z ${PYKCS11LIB+x}'
     log_test_header
     if [[ -z ${PYKCS11LIB+x} ]]; then
-        log_newline " .. ERROR: PYKCS11LIB not set - failed HSM test"
-        exit 1
+        die " .. ERROR: PYKCS11LIB not set - failed HSM test"
     else
         log_newline " .. OK"
     fi
-
-
     if [[ ! -e ${PYKCS11LIB} ]]; then
-        log_newline "PYKCS11LIB not found"
-        exit 1
+        die "PYKCS11LIB not found"
     fi
-
-
     if [[ -z ${PYKCS11PIN+x} ]]; then
-        log_newline "PYKCS11PIN not set - failed HSM test"
-        exit 1
+        die "PYKCS11PIN not set - failed HSM test"
     fi
 
 
@@ -212,8 +186,7 @@ run_tests() {
     pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert \
         | grep 'Certificate Object' 2>&1 > $LOGDIR/test${testid}.log
     if (( $? > 0 )); then
-        log_newline " .. ERROR: No certificate found"
-        exit 1
+        die " .. ERROR: No certificate found"
     else
         log_newline " .. OK"
     fi
@@ -262,8 +235,7 @@ run_tests() {
     log_test_header
     obj_count=$(/tests/pykcs11_getkey.py --pin=$PYKCS11PIN --slot=0 --lib=$PYKCS11LIB | grep -a -c '=== Object ')
     if (( $obj_count != 2 )); then
-        log_newline " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
-        exit 1
+        die " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
     else
         log_newline " .. OK"
     fi
@@ -278,19 +250,105 @@ run_tests() {
     p11tool --provider $PYKCS11LIB --list-all --login pkcs11: > $LOGDIR/test${testid}.log 2>&1
     obj_count=$(grep -c ^Object $LOGDIR/test${testid}.log)
     if (( $obj_count != 2 )); then
-        log_newline " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
-        exit 1
+        die " .. ERROR: Expected 2 objects in HSM token, but listed ${obj_count}"
     else
         log_newline " .. OK"
     fi
 
     #=============
     testid=23
+    test_purpose='List modules with p11.kit '
+    test_cmd="p11-kit list-modules"
+    log_test_header
+    echo "P11KIT_DESC=$P11KIT_DESC"
+    [[ $P11KIT_DESC ]] || die 'ERROR: P11KIT_DESC not set'
+    $test_cmd > $LOGDIR/test${testid}.log 2>&1
+    obj_count=$(grep -c $P11KIT_DESC $LOGDIR/test${testid}.log)
+    if (( $obj_count != 1 )); then
+        die " .. ERROR: Found $obj_count instead of 1 occurence of '$P11KIT_DESC' in output of $test_cmd"
+    else
+        log_newline " .. OK"
+    fi
+
+#   activate commented-out section when automated passing of key passphrase is solved
+#
+#    #=============
+#    testid=24
+#    test_purpose='openssl: create CSR'
+#    test_cmd="openssl req -keyform engine -engine pkcs11 -nodes -days -x509 -sha256 -out key.pem -subj "/C=AT/ST=vie/L=vie/O=acme/CN=testserver" -new -key pkcs11:token=test;object=mdsign;type=private"
+#    log_test_header
+#    $test_cmd > $LOGDIR/test${testid}.log 2>&1
+#    if [[ $? ]]; then
+#        die " .. ERROR: in $test_cmd"
+#    else
+#        log_newline " .. OK"
+#    fi
+#
+#
+#    #=============
+#    testid=25
+#    test_purpose='openssl: create signature'
+#    test_cmd="openssl dgst -sha256 -sign "pkcs11:token=test;object=mdsign;type=private" -keyform engine -engine pkcs11 -out /tmp/hosts.sig /etc/hosts"
+#    log_test_header
+#    $test_cmd > $LOGDIR/test${testid}.log 2>&1
+#    if [[ $? ]]; then
+#        die " .. ERROR: in $test_cmd"
+#    else
+#        log_newline " .. OK"
+#    fi
+#
+#
+#    #=============
+#    testid=26
+#    test_purpose='openssl: verify signature'
+#    # openssl cannot work on x509 certs, needs raw pubkey
+#    openssl x509 -pubkey -noout -in /ramdisk/testcert_crt.pem > /ramdisk/testcert_pubkey.pem
+#    test_cmd="openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature hosts.sig /etc/hosts"
+#    log_test_header
+#    $test_cmd > $LOGDIR/test${testid}.log 2>&1
+#    if [[ $? ]]; then
+#        die " .. ERROR: in $test_cmd"
+#    else
+#        log_newline " .. OK"
+#    fi
+
+
+    #=============
+    testid=27
     test_purpose='List objects with Java keytool (test not working yet) '
     test_cmd="keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11"
     log_test_header
     # fit into single line:
     keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11 || true
 }
+
+
+die() {
+    echo "$@" 1>&2
+    echo "$@" >> $LOGFILE
+    exit 1
+}
+
+
+log_test_header() {
+    printf "Test ${testid}: ${test_purpose} "
+    echo "=======" >> $LOGFILE
+    echo "Test ${testid}: ${test_purpose}" >> $LOGFILE
+    echo "Command: ${test_cmd}" >> $LOGFILE
+    printf "Result:" >> $LOGFILE
+}
+
+
+log_newline() {
+    echo -e $1
+    echo -e $1 >> $LOGFILE
+}
+
+
+log_no_newline() {
+    printf $1
+    printf $1 >> $LOGFILE
+}
+
 
 main $@

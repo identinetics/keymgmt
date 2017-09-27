@@ -52,6 +52,7 @@ _set_run_args() {
     export ENVSETTINGS="$ENVSETTINGS -e HSMP11DEVICE=SoftHSM"  # output of pkcs11-tool --list-token-slots
     export ENVSETTINGS="$ENVSETTINGS -e SOFTHSM=True"  # causes test scripts to skip lsusb
     export ENVSETTINGS="$ENVSETTINGS -e JCE_CONF=/etc/softhsm_JCE.cfg"  # JCE PKCS11 config file
+    export ENVSETTINGS="$ENVSETTINGS -e P11KIT_DESC=SoftHSM.project
 
     export STARTCMD=''
     enable_pkcs11
