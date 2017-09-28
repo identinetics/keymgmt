@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 main() {
     printenv | sort
@@ -270,47 +271,52 @@ run_tests() {
         log_newline " .. OK"
     fi
 
-#   activate commented-out section when automated passing of key passphrase is solved
-#
-#    #=============
-#    testid=24
-#    test_purpose='openssl: create CSR'
-#    test_cmd="openssl req -keyform engine -engine pkcs11 -nodes -days -x509 -sha256 -out key.pem -subj "/C=AT/ST=vie/L=vie/O=acme/CN=testserver" -new -key pkcs11:token=test;object=mdsign;type=private"
-#    log_test_header
-#    $test_cmd > $LOGDIR/test${testid}.log 2>&1
-#    if [[ $? ]]; then
-#        die " .. ERROR: in $test_cmd"
-#    else
-#        log_newline " .. OK"
-#    fi
-#
-#
-#    #=============
-#    testid=25
-#    test_purpose='openssl: create signature'
-#    test_cmd="openssl dgst -sha256 -sign "pkcs11:token=test;object=mdsign;type=private" -keyform engine -engine pkcs11 -out /tmp/hosts.sig /etc/hosts"
-#    log_test_header
-#    $test_cmd > $LOGDIR/test${testid}.log 2>&1
-#    if [[ $? ]]; then
-#        die " .. ERROR: in $test_cmd"
-#    else
-#        log_newline " .. OK"
-#    fi
-#
-#
-#    #=============
-#    testid=26
-#    test_purpose='openssl: verify signature'
-#    # openssl cannot work on x509 certs, needs raw pubkey
-#    openssl x509 -pubkey -noout -in /ramdisk/testcert_crt.pem > /ramdisk/testcert_pubkey.pem
-#    test_cmd="openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature hosts.sig /etc/hosts"
-#    log_test_header
-#    $test_cmd > $LOGDIR/test${testid}.log 2>&1
-#    if [[ $? ]]; then
-#        die " .. ERROR: in $test_cmd"
-#    else
-#        log_newline " .. OK"
-#    fi
+    #=============
+    testid=24
+    test_purpose='openssl: create CSR'
+    test_cmd="openssl req -keyform engine -engine pkcs11 -nodes -days -x509 -sha256 -out key.pem -subj '/C=AT/ST=vie/L=vie/O=acme/CN=testserver' -new -key 'pkcs11:token=test;object=mdsign;type=private;pin-value=$PYKCS11PIN'"
+    log_test_header
+    openssl req -keyform engine -engine pkcs11 -nodes -days -x509 -sha256 -out key.pem -subj '/C=AT/ST=vie/L=vie/O=acme/CN=testserver' -new -key "pkcs11:token=test;object=mdsign;type=private;pin-value=$PYKCS11PIN" \
+        > $LOGDIR/test${testid}.log 2>&1
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: Command returned $? in $test_cmd"
+        cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+
+    #=============
+    testid=25
+    test_purpose='openssl: create signature'
+    test_cmd="openssl dgst -sha256 -sign 'pkcs11:token=test;object=mdsign;type=private;pin-value=$PYKCS11PIN' -keyform engine -engine pkcs11 -out /tmp/hosts.sig /etc/hosts"
+    log_test_header
+    openssl dgst -sha256 -sign "pkcs11:token=test;object=mdsign;type=private;pin-value=$PYKCS11PIN" -keyform engine -engine pkcs11 -out /tmp/hosts.sig /etc/hosts > $LOGDIR/test${testid}.log 2>&1
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: Command returned $? in $test_cmd"
+        cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+
+
+    #=============
+    testid=26
+    test_purpose='openssl: verify signature'
+    # openssl cannot work on x509 certs, needs raw pubkey
+    openssl x509 -pubkey -noout -in /ramdisk/testcert_crt.pem > /ramdisk/testcert_pubkey.pem
+    test_cmd="openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature hosts.sig /etc/hosts"
+    log_test_header
+    $test_cmd > $LOGDIR/test${testid}.log 2>&1
+    if (( $? > 0 )); then
+        log_newline " .. ERROR: Command returned $? in $test_cmd"
+        cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
 
 
     #=============
