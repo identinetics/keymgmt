@@ -278,8 +278,9 @@ run_tests() {
     log_test_header
     openssl req -keyform engine -engine pkcs11 -nodes -days -x509 -sha256 -out key.pem -subj '/C=AT/ST=vie/L=vie/O=acme/CN=testserver' -new -key "pkcs11:token=test;object=mdsign;type=private;pin-value=$PYKCS11PIN" \
         > $LOGDIR/test${testid}.log 2>&1
-    if (( $? > 0 )); then
-        log_newline " .. ERROR: Command returned $? in $test_cmd"
+    rc=$?
+    if (( $rc > 0 )); then
+        log_newline " .. ERROR: Command returned $rc in $test_cmd"
         cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
         exit 1
     else
@@ -293,8 +294,9 @@ run_tests() {
     test_cmd="openssl dgst -sha256 -sign 'pkcs11:token=test;object=mdsign;type=private;pin-value=$PYKCS11PIN' -keyform engine -engine pkcs11 -out /tmp/hosts.sig /etc/hosts"
     log_test_header
     openssl dgst -sha256 -sign "pkcs11:token=test;object=mdsign;type=private;pin-value=$PYKCS11PIN" -keyform engine -engine pkcs11 -out /tmp/hosts.sig /etc/hosts > $LOGDIR/test${testid}.log 2>&1
-    if (( $? > 0 )); then
-        log_newline " .. ERROR: Command returned $? in $test_cmd"
+    rc=$?
+    if (( $rc > 0 )); then
+        log_newline " .. ERROR: Command returned $rc in $test_cmd"
         cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
         exit 1
     else
@@ -309,9 +311,10 @@ run_tests() {
     openssl x509 -pubkey -noout -in /ramdisk/testcert_crt.pem > /ramdisk/testcert_pubkey.pem
     test_cmd="openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature hosts.sig /etc/hosts"
     log_test_header
-    openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature hosts.sig /etc/hosts > $LOGDIR/test${testid}.log 2>&1
-    if (( $? > 0 )); then
-        log_newline " .. ERROR: Command returned $? in $test_cmd"
+    openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature /tmp/hosts.sig /etc/hosts > $LOGDIR/test${testid}.log 2>&1
+    rc=$?
+    if (( $rc > 0 )); then
+        log_newline " .. ERROR: Command returned $rc in $test_cmd"
         cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
         exit 1
     else
