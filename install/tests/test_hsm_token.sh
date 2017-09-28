@@ -309,7 +309,7 @@ run_tests() {
     openssl x509 -pubkey -noout -in /ramdisk/testcert_crt.pem > /ramdisk/testcert_pubkey.pem
     test_cmd="openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature hosts.sig /etc/hosts"
     log_test_header
-    $test_cmd > $LOGDIR/test${testid}.log 2>&1
+    openssl dgst -sha256 -verify /ramdisk/testcert_pubkey.pem  -keyform PEM -signature hosts.sig /etc/hosts > $LOGDIR/test${testid}.log 2>&1
     if (( $? > 0 )); then
         log_newline " .. ERROR: Command returned $? in $test_cmd"
         cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
