@@ -324,11 +324,22 @@ run_tests() {
 
     #=============
     testid=27
-    test_purpose='List objects with Java keytool (test not working yet) '
-    test_cmd="keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11"
+    test_purpose='List objects with Java keytool '
+    test_cmd="keytool -list -keystore NONE -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg /etc/pki/java/pkcs11.cfg"
     log_test_header
     # fit into single line:
-    keytool -list -storetype PKCS11 -storepass $PYKCS11PIN -providerClass sun.security.pkcs11.SunPKCS11 -providerArg $JCE_CONF -J-Djava.security.debug=sunpkcs11 || true
+    keytool -list -keystore NONE -storetype PKCS11 -storepass $PYKCS11PIN \
+        -providerClass sun.security.pkcs11.SunPKCS11 -providerArg /etc/pki/java/pkcs11.cfg \
+         > $LOGDIR/test${testid}.log 2>&1
+    rc=$?
+    if (( $rc > 0 )); then
+        log_newline " .. ERROR: Command returned $rc in $test_cmd"
+        cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
+        exit 1
+    else
+        entries=$(grep 'contains [[:digit:]]* entries' $LOGDIR/test${testid}.log)
+        log_newline " .. OK ($entries)"
+    fi
 }
 
 
