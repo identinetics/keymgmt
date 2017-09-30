@@ -337,7 +337,7 @@ run_tests() {
         cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
         exit 1
     else
-        entries=$(grep 'contains [[:digit:]]* entries' $LOGDIR/test${testid}.log)
+        entries=$(grep 'contains [[:digit:]]* entr' $LOGDIR/test${testid}.log)
         log_newline " .. OK ($entries)"
     fi
 }

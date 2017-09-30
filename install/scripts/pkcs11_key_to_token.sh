@@ -78,10 +78,11 @@ initialize_token() {
 
 write_key_to_token() {
     echo 'writing certificate'
-    cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --write-object $CERT --type cert $CERTLABELOPT"
+    # hint: --id is required for sun PKCS#11 provider to retrieve keys from the token (see http://docs.oracle.com/javase/7/docs/technotes/guides/security/p11guide.html#KeyStoreRestrictions)
+    cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --write-object $CERT --type cert --id 1 $CERTLABELOPT"
     run_command
     echo 'writing private key'
-    cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --write-object $PRIVKEY --type privkey $CERTLABELOPT"
+    cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --write-object $PRIVKEY --type privkey --id 1 $CERTLABELOPT"
     run_command
     echo 'Checking objects on card'
     cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects"
