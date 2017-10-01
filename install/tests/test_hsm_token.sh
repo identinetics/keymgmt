@@ -32,7 +32,7 @@ run_tests() {
         lsusb | grep $HSMUSBDEVICE > $LOGDIR/test${testid}.log
         if (( $? != 0 )); then
             log_newline "\n  HSM USB device not found - failed HSM test"
-            cat $LOGFILE/test${testid}.log | tee >> $LOGFILE
+            cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
             exit 1
         else
             log_newline " .. OK"
