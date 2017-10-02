@@ -181,11 +181,11 @@ run_tests() {
 
     #=============
     testid=18
-    test_purpose='List certificate on HSM device '
+    test_purpose='List certificate on HSM device: '
     test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert | grep 'Certificate Object'"
     log_test_header
     pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert \
-        | grep 'Certificate Object' > $LOGDIR/test${testid}.log 2>&1
+        | grep 'Certificate Object' | perl -pe 'chomp' > $LOGDIR/test${testid}.log 2>&1
     if (( $? > 0 )); then
         die " .. ERROR: No certificate found"
     else
@@ -195,11 +195,11 @@ run_tests() {
 
     #=============
     testid=19
-    test_purpose='List private key on HSM device '
+    test_purpose='List private key on HSM device: '
     test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type privkey | grep 'Certificate Object'"
     log_test_header
     pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type privkey \
-        | grep 'Private Key Object' > $LOGDIR/test${testid}.log 2>&1
+        | grep 'Private Key Object' | perl -pe 'chomp' > $LOGDIR/test${testid}.log 2>&1
     if (( $? > 0 )); then
         log_newline " .. ERROR: No private key found"
         cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
@@ -258,7 +258,7 @@ run_tests() {
 
     #=============
     testid=23
-    test_purpose='List modules with p11.kit '
+    test_purpose='List modules with p11.kit: '
     test_cmd="p11-kit list-modules"
     log_test_header
     printf "P11KIT_DESC=$P11KIT_DESC"
