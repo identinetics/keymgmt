@@ -344,10 +344,9 @@ run_tests() {
 
     #=============
     testid=28
-    test_purpose='Create signature with xmlsectool (not working yet)'
+    test_purpose='Create XML signature with xmlsectool'
     test_cmd="xmlsectool.sh --sign"
     log_test_header
-    # fit into single line:
     /opt/xmlsectool/xmlsectool.sh --sign --pkcs11Config /etc/pki/java/pkcs11.cfg --key mdsign \
          --keystoreProvider sun.security.pkcs11.SunPKCS11 \
          --keyPassword $PYKCS11PIN --inFile /tests/testdata/idpExampleCom.xml --outFile /tmp/idpExampleCom_signed.xml --verbose \
@@ -359,10 +358,31 @@ run_tests() {
         cat $LOGDIR/test${testid}.log
         exit 1
     else
-        entries=$(grep 'contains [[:digit:]]* entr' $LOGDIR/test${testid}.log)
-        log_newline " .. OK ($entries)"
+        log_newline " .. OK"
     fi
 }
+
+
+    #=============
+    testid=29
+    test_purpose='Verify XML signature with xmlsec1'
+    test_cmd="xmlsec1 --verify"
+    log_test_header
+    /usr/bin/xmlsec1 --verify --pubkey-cert-pem /ramdisk/testcert_crt.pem  \
+        --id-attr:ID urn:oasis:names:tc:SAML:2.0:metadata:EntitiesDescriptor \
+        --output /tmp/idpExampleCom_verified.xml.xml /tmp/idpExampleCom_signed.xml
+         > $LOGDIR/test${testid}.log 2>&1
+    rc=$?
+    if (( $rc > 0 )); then
+        log_newline " .. ERROR: Command returned $rc in $test_cmd"
+        cat $LOGDIR/test${testid}.log >> $LOGFILE
+        cat $LOGDIR/test${testid}.log
+        exit 1
+    else
+        log_newline " .. OK"
+    fi
+}
+
 
 
 die() {
