@@ -55,6 +55,20 @@ RUN mkdir -p /opt \
 RUN yum -y install gnupg2 gnupg-agent gnupg2-smime haveged libccid libksba8 libpth20 \
     pinentry-curses paperkey qrencode scdaemon zbar
 
+# --- XMLDSig tools ---
+RUN yum -y install libxslt xmlsec1 xmlsec1-openssl \
+ && yum clean all
+
+# xmlsectool (shibboleth)
+ENV version='2.0.0'
+RUN mkdir -p /opt && cd /opt \
+ && wget "https://shibboleth.net/downloads/tools/xmlsectool/${version}/xmlsectool-${version}-bin.zip" \
+ && unzip "xmlsectool-${version}-bin.zip" \
+ && ln -s "xmlsectool-${version}" 'xmlsectool' \
+ && rm "xmlsectool-${version}-bin.zip"
+ENV XMLSECTOOL=/opt/xmlsectool/xmlsectool.sh
+
+
 COPY install/scripts/* /scripts/
 COPY install/tests/* /tests/
 COPY install/etc/* /etc/

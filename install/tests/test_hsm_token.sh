@@ -340,6 +340,28 @@ run_tests() {
         entries=$(grep 'contains [[:digit:]]* entr' $LOGDIR/test${testid}.log)
         log_newline " .. OK ($entries)"
     fi
+
+
+    #=============
+    testid=28
+    test_purpose='Create signature with xmlsectool (not working yet)'
+    test_cmd="xmlsectool.sh --sign"
+    log_test_header
+    # fit into single line:
+    /opt/xmlsectool/xmlsectool.sh --sign --pkcs11Config /etc/pki/java/pkcs11.cfg --key mdsign \
+         --keystoreProvider sun.security.pkcs11.SunPKCS11 \
+         --keyPassword $PYKCS11PIN --inFile /tests/testdata/idpExampleCom.xml --outFile /tmp/idpExampleCom_signed.xml --verbose \
+         > $LOGDIR/test${testid}.log 2>&1
+    rc=$?
+    if (( $rc > 0 )); then
+        log_newline " .. ERROR: Command returned $rc in $test_cmd"
+        cat $LOGDIR/test${testid}.log >> $LOGFILE
+        cat $LOGDIR/test${testid}.log
+        exit 1
+    else
+        entries=$(grep 'contains [[:digit:]]* entr' $LOGDIR/test${testid}.log)
+        log_newline " .. OK ($entries)"
+    fi
 }
 
 
