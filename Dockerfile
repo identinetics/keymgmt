@@ -29,9 +29,11 @@ RUN yum -y install openssl engine_pkcs11 opensc p11tool pcsc-lite pcsc-scan soft
 ENV JAVA_HOME=/etc/alternatives/jre_1.8.0_openjdk
 COPY install/java_crypto/softhsm_JCE.cfg /etc/pki/java/
 RUN yum -y install java-1.8.0-openjdk-devel.x86_64 \
- && ln -s /etc/pki/java/softhsm_JCE.cfg /etc/pki/java/pkcs11.cfg \
- && printf "\nsecurity.provider.10=sun.security.pkcs11.SunPKCS11 /etc/pki/java/pkcs11.cfg\n" \
-        >> $JAVA_HOME/lib/security/java.security
+ && ln -s /etc/pki/java/softhsm_JCE.cfg /etc/pki/java/pkcs11.cfg
+
+# Do NOT configure JCA statically - dyn + stat yields "org.apache.xml.security.signature.XMLSignatureException: No installed provider supports this key: sun.security.pkcs11.P11Key$P11PrivateKey"
+#RUN printf "\nsecurity.provider.10=sun.security.pkcs11.SunPKCS11 /etc/pki/java/pkcs11.cfg\n" \
+#        >> $JAVA_HOME/lib/security/java.security
 
 # python: pip, -devel
 RUN yum -y install python-pip python-devel \
