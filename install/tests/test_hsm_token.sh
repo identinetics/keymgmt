@@ -185,7 +185,7 @@ run_tests() {
     test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert | grep 'Certificate Object'"
     log_test_header
     pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type cert \
-        | grep 'Certificate Object' 2>&1 > $LOGDIR/test${testid}.log
+        | grep 'Certificate Object' > $LOGDIR/test${testid}.log 2>&1
     if (( $? > 0 )); then
         die " .. ERROR: No certificate found"
     else
@@ -199,7 +199,7 @@ run_tests() {
     test_cmd="pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type privkey | grep 'Certificate Object'"
     log_test_header
     pkcs11-tool --module $PYKCS11LIB --login --pin $PYKCS11PIN --list-objects --type privkey \
-        | grep 'Private Key Object' 2>&1  > $LOGDIR/test${testid}.log
+        | grep 'Private Key Object' > $LOGDIR/test${testid}.log 2>&1
     if (( $? > 0 )); then
         log_newline " .. ERROR: No private key found"
         cat $LOGDIR/test${testid}.log | tee >> $LOGFILE
@@ -261,7 +261,7 @@ run_tests() {
     test_purpose='List modules with p11.kit '
     test_cmd="p11-kit list-modules"
     log_test_header
-    echo "P11KIT_DESC=$P11KIT_DESC"
+    printf "P11KIT_DESC=$P11KIT_DESC"
     [[ $P11KIT_DESC ]] || die 'ERROR: P11KIT_DESC not set'
     $test_cmd > $LOGDIR/test${testid}.log 2>&1
     obj_count=$(grep -c $P11KIT_DESC $LOGDIR/test${testid}.log)
@@ -360,7 +360,6 @@ run_tests() {
     else
         log_newline " .. OK"
     fi
-}
 
 
     #=============
