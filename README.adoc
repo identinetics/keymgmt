@@ -1,22 +1,35 @@
 = Key Management App for LiveCD
+:toc:
+:sectnums:
 
-This Docker application supports smartcard key management tools from GPG and OpenSC. It is
-intended to be started from the PVZDLiveCD.
+This Docker application supports smartcard key management tools for GPG and PKCS11.
+Its main purpose is to create a secure key managment environment by starting it from the PVZDLiveCD.
 
 
 == Supported Smart Cards
 There is out-of-the box support for cards, such as:
 
+- SoftHSMv2 (default)
 - OpenPGP card
 - JavaCard with installed Muscle applet
 - other PKI smartcards supported by OpenSC
 
-To install a proprieatary smart card driver create an image based on this one and include the
-driver installation in the Dockerfile. An example for Safenet eToken Pro is in the keymgmt-safenetac
-project.
+To install a proprieatary smart card driver create an image based on this one and include the driver installation in the Dockerfile.
+An example for Safenet eToken Pro is in the keymgmt-safenetac project.
 
 Commands use PYKCS11LIB to point to the card driver.
 The default token is SoftHSMv2.
+
+== Quick start for PKCS#11
+
+    git clone https://github.com/identinetics/keymgmt
+    cd keymgmt/
+    git submodule update --init
+    cp conf.sh.default conf.sh
+    ./dscripts/build.sh
+    ./dscripts/run.sh -ipV bash
+        /tests/test_hsm_token.sh
+
 
 == RSA key generation for PKCS#11
 
