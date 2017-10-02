@@ -370,7 +370,7 @@ run_tests() {
     log_test_header
     /usr/bin/xmlsec1 --verify --pubkey-cert-pem /ramdisk/testcert_crt.pem  \
         --id-attr:ID urn:oasis:names:tc:SAML:2.0:metadata:EntitiesDescriptor \
-        --output /tmp/idpExampleCom_verified.xml.xml /tmp/idpExampleCom_signed.xml
+        --output /tmp/idpExampleCom_verified.xml.xml /tmp/idpExampleCom_signed.xml \
          > $LOGDIR/test${testid}.log 2>&1
     rc=$?
     if (( $rc > 0 )); then
