@@ -70,8 +70,7 @@ ENV XMLSECTOOL=/opt/xmlsectool/xmlsectool.sh
 
 
 COPY install/scripts/* /scripts/
-COPY install/tests/* /tests/
-COPY install/tests/testdata/* /tests/testdata
+COPY install/tests /tests
 COPY install/etc/* /etc/
 RUN mkdir -p /usr/local/etc/gpg
 COPY install/gpg/* /usr/local/etc/gpg/
