@@ -6,4 +6,5 @@
 
 /scripts/gpg_setup.sh
 
-sleep infinity  # keep docker container running
+#sleep infinity  # keep docker container running
+while : do sleep 86400; done
