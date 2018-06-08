@@ -6,7 +6,7 @@ set -e
 [ -z "$SOPIN" ] && export SOPIN='Secret.2'
 
 echo 'Initializing Token'
-pkcs11-tool --module $PYKCS11LIB --init-token --label test --pin $PYKCS11PIN --so-pin $SOPIN
+pkcs11-tool --module $PYKCS11LIB --init-token --label test --so-pin $SOPIN
 
 echo 'Initializing User PIN'
 pkcs11-tool --module $PYKCS11LIB --login --init-pin --pin $PYKCS11PIN --so-pin $SOPIN

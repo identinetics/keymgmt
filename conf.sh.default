@@ -25,13 +25,14 @@ _set_volume_root() {
 
 
 _set_image_and_container_name() {
-    # IMGID qualifies image, container, user and IP adddress; this is helpful for managing
-    # processes on the docker host etc.
-    IMGID=''
-    PROJSHORT='keymgmt'
-    export IMAGENAME="rhoerbe/$PROJSHORT${IMGID}"  # [a-z_0-9]
-    export CONTAINERNAME="${IMGID}$PROJSHORT"
-    export DOCKER_REGISTRY=''
+    projshort='keymgmt'
+    export SERVICEDESCRIPTION=keymgmgt
+    #export DOCKER_REGISTRY_USER='local' # must be non-blank even for if images are kept local
+    #export DOCKER_REGISTRY='localhost:5000'  # overwrite default registry host
+    set_docker_registry
+    export IMAGENAME="${DOCKER_REGISTRY_USER}/${projshort}"
+    export CONTAINERNAME="$projshort"
+    export IMAGE_TAG_PRODENV='pr'  # required for standalone run script (-> `run.sh -w`)
 }
 
 
