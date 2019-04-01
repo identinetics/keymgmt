@@ -1,13 +1,11 @@
 FROM intra/centos7_py36_base
-LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
-      version="0.6.0"
-# Caveat: home directory is not persistent -> mapped to /tmp when started from LiveCD
+LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>"
 
 # Key Management App
 
 # general tools
 RUN yum -y update \
- && yum -y install curl git ip lsof net-tools openssl sudo sysvinit-tools unzip wget which \
+ && yum -y install curl git ip lsof net-tools openssl sudo unzip wget which \
  && yum clean all
 
 # EPEL, development tools +  X.11
@@ -33,20 +31,18 @@ RUN yum -y install java-1.8.0-openjdk-devel.x86_64 \
 #        >> $JAVA_HOME/lib/security/java.security
 
 # python: pip, -devel
-RUN yum -y install python36u-devel \
+RUN yum -y install python36u-devel swig \
  && yum clean all
-
-RUN pip install six \
- && easy_install --upgrade six
-RUN pip install importlib pykcs11>1.3.1
-# using pykcs11 1.3.0 because of missing wrapper in v 1.3.1
-# && pip install importlib pykcs11==1.3.0
+RUN pip3 install six virtualenv \
+ && pip3 install pykcs11 \
+ && mkdir -p /opt/venv \
+ && virtualenv --system-site-packages /opt/venv/py3
 
 # secret-key splitting utility
-RUN mkdir -p /opt \
- && cd /opt \
+RUN cd /opt \
  && git clone https://github.com/schlatterbeck/secret-splitting.git \
  && cd secret-splitting \
+ && source /opt/venv/py3/bin/activate \
  && /usr/bin/python setup.py install
 
 # key management stuff
