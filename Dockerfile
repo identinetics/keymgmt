@@ -40,9 +40,9 @@ RUN yum -y install python-pip python-devel \
  && yum clean all \
  && pip install --upgrade pip
 
-RUN pip install six \
- && easy_install --upgrade six \
- && pip install importlib pykcs11>1.3.1
+RUN pip install six
+RUN easy_install --upgrade six
+RUN pip install importlib pykcs11>1.3.1
 # using pykcs11 1.3.0 because of missing wrapper in v 1.3.1
 # && pip install importlib pykcs11==1.3.0
 

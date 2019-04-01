@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
 
-[ -z "$PYKCS11PIN" ] && PYKCS11PIN=Secret.1
-[ -z "$SOPIN" ] && SOPIN=Secret.2
+[ -z "$PYKCS11PIN" ] && export PYKCS11PIN=Secret.1
+[ -z "$SOPIN" ] && Sexport OPIN=Secret.2
 echo 'Initializing Token'
 pkcs11-tool --module $PYKCS11LIB --init-token --label testtoken --so-pin $SOPIN || exit -1
 
