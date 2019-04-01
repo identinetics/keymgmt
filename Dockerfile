@@ -1,12 +1,9 @@
-FROM centos:centos7
+FROM intra/centos7_py36_base
 LABEL maintainer="Rainer Hörbe <r2h2@hoerbe.at>" \
-      version="0.5.0" \
-      didi_dir="https://raw.githubusercontent.com/identinetics/keymgmt/master/didi" \
-      capabilities=''
-
+      version="0.6.0"
 # Caveat: home directory is not persistent -> mapped to /tmp when started from LiveCD
 
-# Key Management App for PVZDliveCD
+# Key Management App
 
 # general tools
 RUN yum -y update \
@@ -36,12 +33,11 @@ RUN yum -y install java-1.8.0-openjdk-devel.x86_64 \
 #        >> $JAVA_HOME/lib/security/java.security
 
 # python: pip, -devel
-RUN yum -y install python-pip python-devel \
- && yum clean all \
- && pip install --upgrade pip
+RUN yum -y install python36u-devel \
+ && yum clean all
 
-RUN pip install six
-RUN easy_install --upgrade six
+RUN pip install six \
+ && easy_install --upgrade six
 RUN pip install importlib pykcs11>1.3.1
 # using pykcs11 1.3.0 because of missing wrapper in v 1.3.1
 # && pip install importlib pykcs11==1.3.0
