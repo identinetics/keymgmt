@@ -20,7 +20,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                echo 'Testing PKCS11 Token'
+                echo 'Testing PKCS11 Device'
                 ./dscripts/run.sh -IpV /tests/test_hsm_token.sh
                 '''
             }

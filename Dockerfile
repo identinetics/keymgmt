@@ -16,9 +16,21 @@ RUN yum -y install epel-release \
  && yum clean all
 
 # Crypto + Smart card support
-RUN yum -y install openssl engine_pkcs11 opensc p11tool pcsc-lite pcsc-scan softhsm usbutils gnutls-utils \
+RUN yum -y install openssl engine_pkcs11 p11tool pcsc-lite pcsc-scan softhsm usbutils gnutls-utils \
  && yum clean all \
  && systemctl enable pcscd.service
+
+# Centos 7 stock OpenSC is version 0.16 with bugs and key support limited to RSA<=2048
+WORKDIR /root
+RUN yum -y install autoconf automake gcc gcc-c++ git libtool pcsc-lite-devel \
+ && wget https://github.com/OpenSC/OpenSC/releases/download/0.19.0/opensc-0.19.0.tar.gz \
+ && tar xfvz opensc-*.tar.gz \
+ && cd opensc-* \
+ && ./bootstrap \
+ && ./configure --prefix=/usr/local --sysconfdir=/etc/opensc \
+ && make \
+ && make install
+
 
 # Java keytool plus pkcs11 crypto provider
 ENV JAVA_HOME=/etc/alternatives/jre_1.8.0_openjdk
